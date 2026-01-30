@@ -2,6 +2,8 @@
 """
 Figure 1: The Conceptual Bridge — S³/Spin(3) Geometric Visualization
 
+STANDALONE VERSION - All dependencies embedded for portability
+
 Generates a publication-quality figure showing:
 - Main panel: Keys/queries as rotors on S³, geodesic arcs, heat-kernel attention
 - Inset: Euclidean/flat-chart limit showing Gaussian kernel in tangent space
@@ -19,23 +21,239 @@ from __future__ import annotations
 
 import argparse
 import os
-import sys
-from pathlib import Path
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyArrowPatch
 from mpl_toolkits.mplot3d import proj3d
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 import matplotlib.patches as mpatches
 
-# Add project root to path
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(PROJECT_ROOT))
-
 import torch
-from gat_aimo3.model.rotor_math import geodesic_angle, heat_kernel_weight
-from gat_aimo3.model.embeddings import exp_map_bivector
+from torch import Tensor
+
+
+# =============================================================================
+# Embedded Dependencies from gat_aimo3.model
+# =============================================================================
+
+def quat_dot_abs(a: Tensor, b: Tensor) -> Tensor:
+    """
+    Sign-invariant quaternion dot product: |⟨a, b⟩| ∈ [0, 1].
+
+    This respects the Spin(3) double-cover property where q and -q represent
+    the same rotation. By taking the absolute value, we ensure that the
+    similarity measure is invariant to this sign ambiguity.
+
+    Parameters
+    ----------
+    a : Tensor
+        First quaternion tensor of shape (..., 4). Should be unit-normalized.
+    b : Tensor
+        Second quaternion tensor of shape (..., 4). Should be unit-normalized.
+
+    Returns
+    -------
+    Tensor
+        Absolute dot product of shape (...), clamped to [0, 1].
+        Value of 1 indicates identical rotations; 0 indicates maximally
+        different rotations (π/2 apart in angle).
+
+    References
+    ----------
+    SGA-HAM Paper §2.2: "A common sign-invariant similarity between rotors
+    R_a, R_b is the absolute scalar projection s(R_a, R_b) := |⟨R̃_a R_b⟩₀| ∈ [0,1]."
+    """
+    return (a * b).sum(dim=-1).abs().clamp(0.0, 1.0)
+
+
+def geodesic_angle(a: Tensor, b: Tensor) -> Tensor:
+    """
+    Geodesic angle on the quotient manifold S³/{±1} ≅ SO(3).
+
+    Computes the geodesic distance via 2·arccos(|⟨a, b⟩|), which gives the
+    rotation angle between the two rotors. The factor of 2 arises from the
+    double-cover property of Spin(3) → SO(3).
+
+    Parameters
+    ----------
+    a : Tensor
+        First quaternion tensor of shape (..., 4). Should be unit-normalized.
+    b : Tensor
+        Second quaternion tensor of shape (..., 4). Should be unit-normalized.
+
+    Returns
+    -------
+    Tensor
+        Geodesic angle in radians, shape (...), lying in [0, π].
+
+    Notes
+    -----
+    The formula d_geo = 2·arccos(|⟨a,b⟩|) is derived from the standard
+    quaternion-to-angle formula θ = 2·arccos(q₀) for a unit quaternion
+    representing rotation by angle θ.
+
+    References
+    ----------
+    SGA-HAM Paper §2.2: Geodesic distance definition.
+    """
+    s = quat_dot_abs(a, b)
+    # Ensure at least float32 precision, but preserve float64
+    if s.dtype in (torch.float16, torch.bfloat16):
+        s_working = s.float()
+    else:
+        s_working = s
+        
+    eps = 1e-7
+    # Clamp to avoid domain errors and infinite gradients at +/- 1.0
+    s_clamped = s_working.clamp(-1.0 + eps, 1.0 - eps)
+    ang = 2.0 * torch.acos(s_clamped)
+    return ang.to(dtype=s.dtype)
+
+
+def geodesic_distance_sq(a: Tensor, b: Tensor) -> Tensor:
+    """
+    Squared geodesic distance on S³/{±1}.
+
+    Returns d_geo(a, b)² ∈ [0, π²]. Using the squared distance avoids a
+    square root and is the natural argument for the heat kernel.
+
+    Parameters
+    ----------
+    a : Tensor
+        First quaternion tensor of shape (..., 4). Should be unit-normalized.
+    b : Tensor
+        Second quaternion tensor of shape (..., 4). Should be unit-normalized.
+
+    Returns
+    -------
+    Tensor
+        Squared geodesic distance, shape (...), in [0, π²].
+
+    See Also
+    --------
+    heat_kernel_energy : Uses this for attention weight computation.
+    """
+    ang = geodesic_angle(a, b)
+    return ang * ang
+
+
+def heat_kernel_energy(a: Tensor, b: Tensor, tau: Tensor, eps: float = 1e-6) -> Tensor:
+    """
+    Heat-kernel energy: E = d_geo(a, b)² / (2τ).
+
+    This is the exponent (with sign) in the GSM heat-kernel weight
+    w = exp(-E). Lower energy means higher attention weight.
+
+    Parameters
+    ----------
+    a : Tensor
+        Query rotor tensor of shape (..., 4). Should be unit-normalized.
+    b : Tensor
+        Key rotor tensor of shape (..., 4). Should be unit-normalized.
+    tau : Tensor
+        Temperature parameter, must be positive and broadcastable to
+        the result shape. Smaller τ → sharper locality (more sparse);
+        larger τ → broader attention.
+    eps : float, optional
+        Minimum clamp for τ to prevent division by zero and infinite
+        gradients when τ underflows. Default: 1e-6.
+
+    Returns
+    -------
+    Tensor
+        Heat-kernel energy E ≥ 0, same shape as d_geo²(a, b).
+
+    Notes
+    -----
+    The heat kernel K_τ(a, b) = exp(-d²/(2τ)) is the fundamental solution
+    to the heat equation on the manifold. Its key property for sparsity
+    is **monotonicity**: since dw/dd ≤ 0 for d ≥ 0 (see §5.1), we can
+    upper-bound attention weights using distance lower bounds.
+
+    References
+    ----------
+    SGA-HAM Paper §2.3: "Define the (unnormalized) GSM kernel weight
+    K_ij := exp(-d_ij²/(2τ))"
+    """
+    if not isinstance(tau, Tensor):
+        tau = torch.as_tensor(tau, device=a.device, dtype=a.dtype)
+    tau_safe = tau.clamp_min(eps)
+    return geodesic_distance_sq(a, b) / (2.0 * tau_safe)
+
+
+def heat_kernel_weight(a: Tensor, b: Tensor, tau: Tensor) -> Tensor:
+    """
+    Heat-kernel attention weight: w = exp(-E) = exp(-d_geo²/(2τ)).
+
+    This is the unnormalized GSM attention weight before row-normalization.
+    After normalization, these become the attention probabilities:
+    α_ij = K_ij / Σ_k K_ik.
+
+    Parameters
+    ----------
+    a : Tensor
+        Query rotor tensor of shape (..., 4). Should be unit-normalized.
+    b : Tensor
+        Key rotor tensor of shape (..., 4). Should be unit-normalized.
+    tau : Tensor
+        Temperature parameter, must be positive and broadcastable.
+
+    Returns
+    -------
+    Tensor
+        Unnormalized attention weights in (0, 1], same shape as the
+        pairwise distance computation.
+
+    References
+    ----------
+    SGA-HAM Paper §3.1: "Let P_ij := K_ij / Z_i. Then each row P_i is a
+    probability distribution over keys."
+    """
+    return torch.exp(-heat_kernel_energy(a, b, tau))
+
+
+def exp_map_bivector(b: Tensor, eps: float = 1e-8) -> Tensor:
+    """
+    Compute the exponential map for pure bivectors: exp(B) -> Rotor.
+
+    For a bivector B = b1*e12 + b2*e13 + b3*e23 with norm theta = |B|,
+    exp(B) = cos(theta) + (B/theta) * sin(theta).
+
+    Parameters
+    ----------
+    b : Tensor
+        Bivector coefficients, shape (..., 3).
+        Components correspond to [e12, e13, e23].
+    eps : float
+        Epsilon for numerical stability at zero.
+
+    Returns
+    -------
+    Tensor
+        Unit rotor components [scalar, e12, e13, e23], shape (..., 4).
+    """
+    theta = b.norm(dim=-1, keepdim=True)  # (..., 1)
+    
+    # cos(theta) term (scalar part)
+    scalar = torch.cos(theta)
+    
+    # sinc(theta) = sin(theta)/theta term (bivector scale)
+    # Use Taylor expansion for small theta to avoid division by zero
+    sinc = torch.sin(theta) / theta.clamp_min(eps)
+    
+    # Handle singularity at 0
+    # sin(x)/x -> 1 as x -> 0. We can just rely on stable numerics 
+    # or explicit masking if eps isn't enough, but clamp_min usually suffices 
+    # for gradients if we start away from 0. For exact 0, sinc=1.
+    # To be perfectly safe for exact zeros:
+    is_small = theta < eps
+    sinc = torch.where(is_small, torch.ones_like(sinc), sinc)
+    
+    # Bivector part: B * sinc
+    bivector = b * sinc
+    
+    # Concatenate [scalar, bivector]
+    return torch.cat([scalar, bivector], dim=-1)
 
 
 # =============================================================================

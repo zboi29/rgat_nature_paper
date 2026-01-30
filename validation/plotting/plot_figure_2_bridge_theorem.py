@@ -2,6 +2,8 @@
 """
 Figures 2 & 3: Bridge Theorem Visualization and Empirical Validation
 
+STANDALONE VERSION - All dependencies embedded for portability
+
 Generates two publication-quality figures:
 
 Figure 2: The Bridge Theorem in One Glance
@@ -23,22 +25,164 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import sys
 import time
-from pathlib import Path
 
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 from scipy import stats
 
-# Add project root to path
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(PROJECT_ROOT))
-
 import torch
-from gat_aimo3.model.rotor_math import geodesic_distance_sq, quat_dot_abs
-from gat_aimo3.model.embeddings import exp_map_bivector
+from torch import Tensor
+
+
+# =============================================================================
+# Embedded Dependencies from gat_aimo3.model
+# =============================================================================
+
+def quat_dot_abs(a: Tensor, b: Tensor) -> Tensor:
+    """
+    Sign-invariant quaternion dot product: |⟨a, b⟩| ∈ [0, 1].
+
+    This respects the Spin(3) double-cover property where q and -q represent
+    the same rotation. By taking the absolute value, we ensure that the
+    similarity measure is invariant to this sign ambiguity.
+
+    Parameters
+    ----------
+    a : Tensor
+        First quaternion tensor of shape (..., 4). Should be unit-normalized.
+    b : Tensor
+        Second quaternion tensor of shape (..., 4). Should be unit-normalized.
+
+    Returns
+    -------
+    Tensor
+        Absolute dot product of shape (...), clamped to [0, 1].
+        Value of 1 indicates identical rotations; 0 indicates maximally
+        different rotations (π/2 apart in angle).
+
+    References
+    ----------
+    SGA-HAM Paper §2.2: "A common sign-invariant similarity between rotors
+    R_a, R_b is the absolute scalar projection s(R_a, R_b) := |⟨R̃_a R_b⟩₀| ∈ [0,1]."
+    """
+    return (a * b).sum(dim=-1).abs().clamp(0.0, 1.0)
+
+
+def geodesic_angle(a: Tensor, b: Tensor) -> Tensor:
+    """
+    Geodesic angle on the quotient manifold S³/{±1} ≅ SO(3).
+
+    Computes the geodesic distance via 2·arccos(|⟨a, b⟩|), which gives the
+    rotation angle between the two rotors. The factor of 2 arises from the
+    double-cover property of Spin(3) → SO(3).
+
+    Parameters
+    ----------
+    a : Tensor
+        First quaternion tensor of shape (..., 4). Should be unit-normalized.
+    b : Tensor
+        Second quaternion tensor of shape (..., 4). Should be unit-normalized.
+
+    Returns
+    -------
+    Tensor
+        Geodesic angle in radians, shape (...), lying in [0, π].
+
+    Notes
+    -----
+    The formula d_geo = 2·arccos(|⟨a,b⟩|) is derived from the standard
+    quaternion-to-angle formula θ = 2·arccos(q₀) for a unit quaternion
+    representing rotation by angle θ.
+
+    References
+    ----------
+    SGA-HAM Paper §2.2: Geodesic distance definition.
+    """
+    s = quat_dot_abs(a, b)
+    # Ensure at least float32 precision, but preserve float64
+    if s.dtype in (torch.float16, torch.bfloat16):
+        s_working = s.float()
+    else:
+        s_working = s
+        
+    eps = 1e-7
+    # Clamp to avoid domain errors and infinite gradients at +/- 1.0
+    s_clamped = s_working.clamp(-1.0 + eps, 1.0 - eps)
+    ang = 2.0 * torch.acos(s_clamped)
+    return ang.to(dtype=s.dtype)
+
+
+def geodesic_distance_sq(a: Tensor, b: Tensor) -> Tensor:
+    """
+    Squared geodesic distance on S³/{±1}.
+
+    Returns d_geo(a, b)² ∈ [0, π²]. Using the squared distance avoids a
+    square root and is the natural argument for the heat kernel.
+
+    Parameters
+    ----------
+    a : Tensor
+        First quaternion tensor of shape (..., 4). Should be unit-normalized.
+    b : Tensor
+        Second quaternion tensor of shape (..., 4). Should be unit-normalized.
+
+    Returns
+    -------
+    Tensor
+        Squared geodesic distance, shape (...), in [0, π²].
+
+    See Also
+    --------
+    heat_kernel_energy : Uses this for attention weight computation.
+    """
+    ang = geodesic_angle(a, b)
+    return ang * ang
+
+
+def exp_map_bivector(b: Tensor, eps: float = 1e-8) -> Tensor:
+    """
+    Compute the exponential map for pure bivectors: exp(B) -> Rotor.
+
+    For a bivector B = b1*e12 + b2*e13 + b3*e23 with norm theta = |B|,
+    exp(B) = cos(theta) + (B/theta) * sin(theta).
+
+    Parameters
+    ----------
+    b : Tensor
+        Bivector coefficients, shape (..., 3).
+        Components correspond to [e12, e13, e23].
+    eps : float
+        Epsilon for numerical stability at zero.
+
+    Returns
+    -------
+    Tensor
+        Unit rotor components [scalar, e12, e13, e23], shape (..., 4).
+    """
+    theta = b.norm(dim=-1, keepdim=True)  # (..., 1)
+    
+    # cos(theta) term (scalar part)
+    scalar = torch.cos(theta)
+    
+    # sinc(theta) = sin(theta)/theta term (bivector scale)
+    # Use Taylor expansion for small theta to avoid division by zero
+    sinc = torch.sin(theta) / theta.clamp_min(eps)
+    
+    # Handle singularity at 0
+    # sin(x)/x -> 1 as x -> 0. We can just rely on stable numerics 
+    # or explicit masking if eps isn't enough, but clamp_min usually suffices 
+    # for gradients if we start away from 0. For exact 0, sinc=1.
+    # To be perfectly safe for exact zeros:
+    is_small = theta < eps
+    sinc = torch.where(is_small, torch.ones_like(sinc), sinc)
+    
+    # Bivector part: B * sinc
+    bivector = b * sinc
+    
+    # Concatenate [scalar, bivector]
+    return torch.cat([scalar, bivector], dim=-1)
 
 
 # =============================================================================
@@ -388,12 +532,13 @@ def generate_figure_3(
     
     print("\n[1/2] Head-level O(ε²) experiment...")
     # Focus on smaller epsilon where small-angle approximation is tighter
-    epsilon_values = np.array([0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1])
+    # Avoid too small (noise) and too large (saturation)
+    epsilon_values = np.array([0.001, 0.002, 0.005, 0.01, 0.02])
     head_results = run_head_level_experiment(
         epsilon_values,
         n_queries=8,
         n_keys=32,
-        n_trials=200,
+        n_trials=400,
         tau=tau,
         seed=seed,
     )
@@ -405,7 +550,7 @@ def generate_figure_3(
         epsilon=0.01,  # Use smaller epsilon for cleaner depth scaling
         n_queries=8,
         n_keys=32,
-        n_trials=100,
+        n_trials=200,
         tau=tau,
         seed=seed,
     )
@@ -445,17 +590,25 @@ def generate_figure_3(
         eps, mean_err, yerr=std_err_vals,
         fmt='o', markersize=8, color='#3498db', 
         capsize=4, capthick=1.5, elinewidth=1.5,
-        label='Empirical (200 trials/ε)'
+        label='Empirical (400 trials/ε)'
     )
     
     # Fitted line
     eps_fit = np.logspace(np.log10(eps.min()), np.log10(eps.max()), 100)
     fitted_line = np.exp(intercept) * eps_fit**slope
     ax1.loglog(eps_fit, fitted_line, 'r--', linewidth=2, 
-               label=f'Fit: $m = {slope:.2f} \\pm {std_err:.2f}$')
+               label=f'Fit: $m = {slope:.3f} \\pm {std_err:.3f}$')
     
     # Theoretical O(ε²) reference
-    C_theo = np.exp(intercept) * (eps[4] ** (2 - slope)) / (eps[4] ** 2)  # Match at midpoint
+    # Anchor to the data at the midpoint to show slope difference clearly
+    mid_idx = len(eps) // 2
+    x_mid = eps[mid_idx]
+    y_fit_mid = np.exp(intercept) * x_mid**slope
+    
+    # C_theo * x_mid^2 = y_fit_mid  =>  C_theo = y_fit_mid / x_mid^2
+    # We shift it slightly up (1.5x) so it doesn't occlude the fit
+    C_theo = 1.5 * (y_fit_mid / (x_mid**2))
+    
     theo_line = C_theo * eps_fit**2
     ax1.loglog(eps_fit, theo_line, 'k:', linewidth=1.5, alpha=0.6,
                label=r'Theory: $O(\varepsilon^2)$')
@@ -469,7 +622,7 @@ def generate_figure_3(
     # Slope annotation
     ax1.text(
         0.05, 0.95,
-        f'Fitted slope: {slope:.2f}\n(expected: 2.0)',
+        f'Fitted slope: {slope:.3f}\n(expected: 2.0)',
         transform=ax1.transAxes, fontsize=11,
         verticalalignment='top',
         bbox=dict(boxstyle='round', facecolor='#ecf0f1', alpha=0.9)
@@ -562,7 +715,7 @@ def generate_figure_3(
     print("=" * 60)
     print(f"""
 Empirical validation of Bridge Theorem bounds (SI Theorem S4, Corollary S14).
-(a) Head-level error ||P^GSM - P^std||_∞ scales as O(ε²); fitted slope m = {slope:.2f} ± {std_err:.2f}.
+(a) Head-level error ||P^GSM - P^std||_∞ scales as O(ε²); fitted slope m = {slope:.3f} ± {std_err:.3f}.
 (b) Depth-accumulated error scales as O(L·ε²) with ε = 0.1.
 Inset shows BCH commutator curvature growth.
 Code and seeds included; experiment completed in {elapsed_time:.1f}s on CPU.
