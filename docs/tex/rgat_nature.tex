@@ -1,0 +1,579 @@
+\documentclass[10pt,twocolumn]{article}
+
+% Basic packages
+\usepackage[margin=0.75in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsthm}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{mathptmx}
+
+% Nature-style tuning (lightweight)
+\setlength{\columnsep}{0.25in}
+\setlength{\parskip}{0.2em}
+\setlength{\parindent}{1em}
+\raggedbottom
+
+\title{Riemannian Geometric Algebra Transformers: A Curved-Geometry Limit of Standard Attention}
+\author{Zachary Joseph}
+\date{\today}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Cl}{\mathrm{Cl}}
+\newcommand{\Spin}{\mathrm{Spin}}
+\newcommand{\SO}{\mathrm{SO}}
+\newcommand{\dgeo}{d_{\mathrm{geo}}}
+\newcommand{\inner}[2]{\langle #1,#2 \rangle}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\Log}{\operatorname{Log}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Transformers implicitly assume a flat representational geometry: similarity is
+Euclidean, composition is linear, and attention is a softmax of dot products.
+We show that these operations arise as a degenerate limit of a curved geometric
+operator family on the rotor manifold $\Spin(3)$, realized in the Clifford
+algebra $\Cl(3,0)$. In the small-angle regime, geometric softmax reduces to
+classical dot-product attention (under the assumptions of SI Theorem~S4); yet,
+at depth, many small-angle steps accumulate curvature through
+Baker--Campbell--Hausdorff commutators, providing a precise sense in which
+standard Transformers approximate rotor dynamics. The paper focuses on this
+mathematical discovery and its structural implications for interpretability.
+All formal derivations are given in the Supplementary Information.
+\end{abstract}
+
+\section*{Main}
+\textbf{Thesis.} Standard Transformer attention is a flat limit of a
+Riemannian operator family. The key move is to lift similarity from dot
+products to intrinsic geodesic distance on $\Spin(3)$; attention then becomes
+heat-kernel diffusion, and composition becomes group multiplication. The
+resulting Riemannian Geometric Algebra Transformer (RGAT) does not merely
+reparameterize attention; it identifies the curved operator calculus of which
+standard attention is a special case. This paper isolates that geometric
+relationship and its consequences for how Transformers learn structurally.
+
+\textbf{Euclidean attention as a Gaussian kernel.} For standard attention with
+queries $q_i$ and keys $k_j$, the logits $q_i^\top k_j/\tau$ can be rewritten as
+\begin{equation}
+  \frac{1}{\tau}q_i^\top k_j
+  = -\frac{1}{2\tau}\|q_i-k_j\|^2
+    + \frac{1}{2\tau}\|q_i\|^2
+    + \frac{1}{2\tau}\|k_j\|^2.
+\end{equation}
+Row-wise softmax eliminates the $\|q_i\|^2$ term, so standard attention is
+equivalent to a Gaussian kernel on Euclidean space up to key-dependent bias.
+RGAT replaces the Euclidean distance with the intrinsic geodesic distance on
+$\Spin(3)$, yielding a genuine heat-kernel operator on a curved manifold.
+
+\textbf{Geometric softmax (GSM) attention.} We define GSM as the geometric
+diffusion family with logits and row-normalized weights
+\begin{equation}
+  \ell^{\mathrm{GSM}}_{ij}=-(2\tau_h)^{-1}\dgeo(\mu_i,r_j)^2,\qquad
+  P_{ij}=\frac{\exp(\ell^{\mathrm{GSM}}_{ij})}{\sum_k\exp(\ell^{\mathrm{GSM}}_{ik})}.
+\end{equation}
+Dot-product attention is the Euclidean tangent approximation of this broader
+family: in normal coordinates, $\dgeo(\mu_i,r_j)^2$ reduces to $\|\mu_i-r_j\|^2$
+and the GSM kernel reduces to the Euclidean Gaussian (SI Theorem~S4).
+
+\textbf{Geometric setting.} We work in the Clifford algebra $\Cl(3,0)$ with
+basis $\{1,e_1,e_2,e_3,e_{12},e_{23},e_{31},e_{123}\}$ and relations
+$e_i e_j + e_j e_i = 2\delta_{ij}$. The even subalgebra $\Cl^+(3,0)$ is
+isomorphic to the quaternions and parameterizes the rotor group $\Spin(3)$. A
+rotor $q\in\Spin(3)$ is a unit quaternion, defined up to sign ($q\sim -q$). We
+use the sign-invariant similarity
+\begin{equation}
+  s(q,k)=|\inner{q,k}|\in[0,1],
+\end{equation}
+with geodesic distance
+\begin{equation}
+  \dgeo(q,k)=2\arccos(s(q,k)).
+\end{equation}
+The principal log map $\Log$ is defined away from the cut locus, so
+$\dgeo(q,k)=2\|\Log(q^*k)\|$. We use the bi-invariant metric induced by the
+round embedding $S^3\subset\R^4$; sign invariance is formalized in SI
+Lemma~S1.
+
+\textbf{Why $\Spin(3)$.} Among compact Lie groups, $\Spin(3)\cong\mathrm{SU}(2)$
+is the minimal non-abelian instance, and it already captures non-commutative
+composition and curvature. It is therefore the smallest setting in which
+rotor-valued attention is genuinely different from Euclidean linear algebra,
+while retaining explicit formulas and a closed-form geodesic distance. Higher
+dimensional choices $\Spin(n)$ or product groups (e.g., $\Spin(3)^m$) follow the
+same constructions: replace the rotor algebra, keep sign-invariant distances,
+and apply the same diffusion kernel and normalization. The generalization is
+structural rather than algorithmic, and requires no conceptual change to the
+operator definition.
+
+\textbf{Rotor subspace and normalization.} A multivector in $\Cl(3,0)$ has eight
+components; the rotor subspace is the scalar+bivector part. Denoting a
+multivector by $x=(x_0,x_1,\dots,x_7)$, the rotor projection is
+\begin{equation}
+  P_{\mathrm{rot}}(x)=\frac{(x_0,x_4,x_5,x_6)}{\|(x_0,x_4,x_5,x_6)\|},
+\end{equation}
+which enforces the unit-sphere constraint. This is the geometric locus on
+which GSM distances are defined; any linear mixing is followed by normalization
+to keep representations on the manifold.
+
+\textbf{Double cover and sign invariance.} The map $\Spin(3)\to\SO(3)$ is a
+double cover: $q$ and $-q$ represent the same rotation. Any physically
+meaningful distance must therefore be invariant under $q\mapsto -q$. The
+sign-invariant similarity $s(q,k)=|\inner{q,k}|$ and the corresponding distance
+$\dgeo(q,k)=2\arccos(s(q,k))$ are exactly the quantities that descend to
+$\SO(3)$. This removes spurious antipodal distinctions and ensures that the
+geometric kernel is well-defined on the rotation group.
+
+\textbf{Bivectors as generators.} The Lie algebra of $\Spin(3)$ is spanned by
+bivectors in $\Cl(3,0)$; these encode oriented rotation planes. If $B$ is a
+unit bivector, then $\exp(\theta B/2)=\cos(\theta/2)+B\sin(\theta/2)$ is a
+rotor of angle $\theta$. Thus the exponential map identifies the Lie algebra
+with infinitesimal rotation generators, and the log map recovers these
+generators from finite rotors. This identification is the geometric substrate
+of the small-angle regime: near the identity, the rotor manifold is well
+approximated by its bivector Lie algebra.
+\textbf{Grades and invariants.} A multivector decomposes into grades
+(scalar, vector, bivector, trivector). The even grades form a subalgebra that
+is closed under multiplication, and the rotor constraint selects a unit sphere
+within this subalgebra. This structure makes $\Spin(3)$ a natural state space
+for rotationally equivariant operators: distances and diffusion weights depend
+only on even-grade components, while odd grades can be interpreted as auxiliary
+features transported by the same group action.
+
+\textbf{Clifford action and orthogonality.} A unit rotor $q$ acts on
+$\Cl(3,0)$ by left multiplication, inducing a linear map
+$L(q):\R^8\to\R^8$. Because $q$ is unit, this action is orthogonal:
+$L(q)^\top L(q)=I$. On vectors $x\in\R^3\subset\Cl(3,0)$, the conjugation
+$x\mapsto qxq^*$ produces a proper rotation in $\SO(3)$, and the double cover
+$q\sim -q$ acts identically. This provides a concrete geometric realization of
+the group action underlying RGAT’s operator family, and explains why sign
+invariance is essential for geometric distances.
+
+\textbf{Lie-group geometry and domain of validity.} Rotors form a compact Lie
+group; the exponential map is globally defined but the principal logarithm is
+unique only away from the cut locus $\{-1\}$. Consequently, all small-angle
+expansions are performed within the injectivity radius so that $\Log$ is
+well-defined. This domain is not a technicality: it specifies the region in
+which standard attention is a faithful Euclidean shadow of the curved
+operator, and it delineates when curvature begins to dominate. The SI states
+all bounds with this domain explicitly.
+In practice, a consistent sign choice and avoidance of antipodal pairs keeps
+rotors away from the cut locus; optional angle or temperature clipping can
+enforce this regime during analysis.
+
+\textbf{Geometric operators.} Attention becomes heat-kernel diffusion on
+$\Spin(3)$. Given predicted rotors $\mu_i$ and key rotors $r_j$, define
+\begin{equation}
+  K_{ij}=\exp\left(-\frac{\dgeo(\mu_i,r_j)^2}{2\tau_h}\right),\qquad
+  P_{ij}=\frac{K_{ij}}{\sum_k K_{ik}},
+\end{equation}
+which is a row-stochastic Markov operator (SI Theorem~S5). This endows
+attention with a diffusion interpretation: each query induces a probability
+measure on $\Spin(3)$ concentrated near geodesically close keys. For bounded
+values, the operator is non-expansive (SI Corollary~S6), a stability property
+of diffusion on compact manifolds.
+
+\textbf{Operator-theoretic framing.} In continuous form, attention is an
+integral operator with kernel $K(\mu,r)$ acting on a vector-valued field
+$v(r)$; in discrete form it is the Markov matrix $P$. Geometrically, $P$ is a
+finite approximation to the heat semigroup on $\Spin(3)$, with bandwidth
+parameter $\tau_h$ controlling the diffusion scale. This connects attention to
+classical diffusion geometry: the kernel approximates a Laplace--Beltrami operator
+up to normalization, and the resulting diffusion distances can be interpreted
+as intrinsic geometric similarity. RGAT therefore embeds attention in the
+operator calculus of compact Lie groups rather than in linear Euclidean space.
+
+\textbf{Heat equation viewpoint.} Let $u(t,\cdot)$ solve the heat equation
+$\partial_t u = \Delta u$ on $\Spin(3)$ with Laplace--Beltrami operator
+$\Delta$. The solution is $u(t,\cdot)=e^{t\Delta}u(0,\cdot)$, a diffusion
+semigroup whose kernel is the heat kernel. GSM implements a single discrete
+time step of this diffusion, replacing continuous integration by a finite
+kernel evaluation over keys. This framing aligns attention with a fundamental
+geometric PDE, making the operator’s stability and locality properties
+mathematically transparent.
+
+\textbf{Heat-kernel asymptotics.} On compact Riemannian manifolds the heat
+kernel admits a short-time Gaussian asymptotic in normal coordinates. Thus, for
+small $\tau_h$, the kernel concentrates along geodesics and locally resembles
+the Euclidean Gaussian in the tangent space. This fact underlies the bridge to
+dot-product attention: the diffusion is locally Euclidean in the small-angle
+regime, but globally governed by curvature. The SI formalizes the resulting
+logit expansion and its stability under softmax (Lemmas~S2--S3).
+
+\textbf{Normalization and row-wise constants.} Both Euclidean attention and GSM
+produce a row-stochastic operator after normalization. Because row-wise
+softmax is invariant to additive constants, any query-dependent bias in the
+logits cancels. This is the algebraic reason the Gaussian form of standard
+attention coincides with a Euclidean heat kernel up to a constant, and it is
+precisely the mechanism exploited in the Bridge Theorem. The SI gives the
+explicit expansion showing that the only nonconstant correction terms are
+$O(\varepsilon^2)$ in the small-angle regime.
+
+\textbf{Spectral viewpoint.} Because $P$ is row-stochastic and derived from a
+positive kernel, its spectrum lies in the unit disk and its principal
+eigenvector is constant. This provides a spectral notion of diffusion time and
+mixing: the leading eigenmodes capture low-frequency structure on $\Spin(3)$,
+while the spectral gap controls the decay of high-frequency components. In this
+view, attention weights encode a geometry-dependent low-pass filter, and the
+operator family varies continuously with the rotor field.
+
+\textbf{Composition and helical flow.} The rotor group admits an axis-angle
+form
+\begin{equation}
+  R(\theta,B)=\cos(\theta/2)+B\sin(\theta/2),\qquad B^2=-1,
+\end{equation}
+so composition along a fixed bivector plane adds phase:
+$R(\theta_1,B)R(\theta_2,B)=R(\theta_1+\theta_2,B)$. This induces helical
+trajectories on $\Spin(3)$ when stacked across layers, providing a geometric
+interpretation of deep composition as a structured rotational flow. In this
+language, attention is diffusion on a rotating frame bundle.
+
+\textbf{Euclidean limit (Bridge Theorem).} Write $q=\exp(u)$ and $k=\exp(v)$
+with $\|u\|,\|v\|=O(\varepsilon)$ below the injectivity radius. Then
+\begin{equation}
+  \dgeo(q,k)^2=4\|u-v\|^2+O(\varepsilon^4)
+  \quad\text{(SI Lemma~S2)},
+\end{equation}
+and the GSM logit expands as
+\begin{equation}
+  \ell_{\mathrm{GSM}}(u,v)=\frac{1}{\tau}u^\top v-\frac{1}{2\tau}\|v\|^2+C
+  +O(\varepsilon^2).
+\end{equation}
+Therefore, row-wise softmax matches dot-product attention to $O(\varepsilon^2)$
+under bounded logits (SI Lemmas~S2--S3 and Theorem~S4). This is the precise
+sense in which standard attention is a geometry-collapsed limit of heat-kernel
+attention. The BCH series controls the small-angle regime and requires the
+relative rotation to remain away from the cut locus; we explicitly maintain
+this domain throughout the SI.
+
+\textbf{Bridge Theorem (statement).} Let $Q,K\in\R^{T\times 3}$ with
+$\|Q_i\|,\|K_j\|\le\varepsilon$ and $\tau\ge\tau_{\min}>0$. Define
+\begin{equation}
+  \ell_{ij}^{\mathrm{GSM}}=-(2\tau)^{-1}\dgeo(R(Q_i),R(K_j))^2,\qquad
+  \ell_{ij}^{\mathrm{std}}=\tau^{-1}Q_i^\top K_j.
+\end{equation}
+Then there exists $C_{\mathrm{head}}$ such that
+\begin{equation}
+  \|P^{\mathrm{GSM}}-P^{\mathrm{softmax}}\|_\infty \le C_{\mathrm{head}}\varepsilon^2,
+\end{equation}
+and under $L$ Lipschitz layers with constants $L_\ell$, there exists
+$C_{\mathrm{stack}}=C_{\mathrm{head}}\prod_\ell L_\ell$ such that
+\begin{equation}
+  \|\mathcal{F}_{\mathrm{RGAT}}-\mathcal{F}_{\mathrm{Transformer}}\|
+  \le C_{\mathrm{stack}}\varepsilon^2.
+\end{equation}
+The norms and Lipschitz constants are defined in the SI (max-row $\ell_2$ on
+sequences); this is the rigorous content of the Euclidean limit (SI
+Theorem~S4).
+
+\textbf{Depth accumulates curvature.} The Euclidean limit is not the end of the
+story. Repeated composition of small-angle steps yields curvature through BCH
+commutators. For generators $u_\ell$ with $\|u_\ell\|\le\varepsilon$, the product
+$\prod_{\ell=1}^L\exp(u_\ell)=\exp(w_L)$ satisfies
+\begin{equation}
+  w_L=\sum_{\ell=1}^L u_\ell + \frac12\sum_{i<j}[u_i,u_j] + R_L,
+\end{equation}
+with $\|R_L\|\le C L^3\varepsilon^3$ (SI Lemma~S12 and Theorem~S13). Thus a
+standard Transformer can be interpreted as using many small-angle steps to
+approximate rotor dynamics; the commutator sum is the precise curvature that
+accumulates with depth. SI Corollary~S14 formalizes the approximation of rotor
+flow by standard attention under uniformly bounded Lipschitz constants. This is
+an intrinsically geometric statement about deep composition.
+
+\textbf{Depth Accumulation (statement).} Let $u_1,\dots,u_L\in\R^3$ satisfy
+$\|u_\ell\|\le\varepsilon$ and $L\varepsilon$ below the injectivity radius.
+Then there exists $w_L$ such that
+\[
+\prod_{\ell=1}^L\exp(u_\ell)=\exp(w_L)
+\]
+and
+\begin{equation}
+  w_L=\sum_{\ell=1}^L u_\ell + \frac12\sum_{i<j}[u_i,u_j] + R_L,
+  \quad \|R_L\|\le C L^3\varepsilon^3.
+\end{equation}
+Consequently, even when each layer is near-Euclidean, the effective generator
+includes commutator curvature of size $O(L^2\varepsilon^2)$ (SI Theorem~S13).
+Combined with the Bridge Theorem, this yields the corollary that standard
+attention approximates rotor flow at depth with $O(L\varepsilon^2)$ error under
+uniform Lipschitz bounds (SI Corollary~S14).
+
+\textbf{Path-ordered viewpoint.} The product of exponentials
+$\prod_{\ell=1}^L\exp(u_\ell)$ is the discrete analogue of a path-ordered
+exponential on a Lie group. In continuum language, a time-varying generator
+$u(t)$ induces a flow by a time-ordered exponential
+${\\mathcal{T}}\\exp(\\int u(t)\\,dt)$. Depth-accumulated curvature is therefore a
+discrete holonomy effect: even when each step is infinitesimal, noncommuting
+generators yield a net rotation that cannot be captured by Euclidean addition
+alone. This provides a principled mathematical explanation for why deep stacks
+can realize curved dynamics despite operating in a locally flat regime.
+
+\textbf{Holonomy and curvature.} The commutator sum in the BCH expansion is the
+lowest-order manifestation of curvature in a noncommutative group: it is the
+obstruction to the naive additive law of generators. In geometric terms, it is
+the discrete curvature two-form integrated over layer pairs. This connects the
+depth of a Transformer to a curvature scale, independent of any particular
+training objective, and gives an operator-theoretic meaning to ``depth as
+geometry.''
+
+\textbf{Operator composition and effective generators.} Let
+$\mathcal{P}_{\tau}$ denote the diffusion operator induced by GSM and
+$\mathcal{L}_q$ the left action of a rotor on multivector fibers. A depth-$L$
+RGAT stack is an operator product
+\begin{equation}
+  \mathcal{F}=\mathcal{L}_{q_L}\circ\mathcal{P}_{\tau_L}\circ\cdots\circ
+  \mathcal{L}_{q_1}\circ\mathcal{P}_{\tau_1}.
+\end{equation}
+In the Euclidean limit, each diffusion operator reduces to dot-product
+softmax; nevertheless, the product of near-identity exponentials yields a
+nontrivial effective generator through the commutator expansion. This ties
+depth directly to curvature: the operator family is flat only to first order.
+
+\textbf{Summary of formal results (informal).} The supplementary manuscript
+establishes four core facts that support the geometric identification:
+(i) sign-invariant geodesic distance on $\Spin(3)$ (SI Lemma~S1),
+(ii) small-angle expansion and softmax stability (SI Lemmas~S2--S3),
+(iii) Euclidean-limit equivalence between GSM and dot-product attention
+(SI Theorem~S4), and (iv) depth-accumulated curvature through BCH commutators
+(SI Lemma~S12, Theorem~S13, Corollary~S14). These results isolate the precise
+mathematical conditions under which a standard Transformer is a flat
+specialization of a curved operator family.
+
+\textbf{Structural learning.} Learning, structurally, is the selection of a
+geometric operator family: a rotor field, a diffusion kernel, and a composition
+rule that respects manifold constraints. The geometry is gauge-consistent under
+the bi-invariant metric: if all rotors transform by a global $g\in\Spin(3)$,
+attention weights are unchanged and outputs transform equivariantly (SI
+Theorem~S9). The intrinsic energy $\tfrac12\dgeo(q,r)^2$ yields geodesic
+alignment dynamics on $S^3$ (SI Theorem~S10) and clarifies how alignment
+proceeds along geodesics rather than through arbitrary Euclidean paths (SI
+Corollary~S11). The core point is conceptual: the learned object is a geometry,
+not merely a set of weights.
+
+\textbf{Riemannian dynamics on $S^3$.} The tangent space at a unit rotor
+$q\in S^3$ is $T_qS^3=\{v\in\R^4:\inner{q,v}=0\}$. The orthogonal projector is
+$P_q=I-qq^\top$, so the Riemannian gradient of any smooth function
+$f:S^3\to\R$ is $\nabla_R f(q)=P_q\nabla f(q)$. This geometric calculus is
+the correct language for rotor dynamics: it ensures updates remain on the
+manifold and preserves the gauge symmetry of the operator family. SI
+Theorem~S10 provides the explicit gradient for the geodesic energy, which
+aligns rotors along minimal geodesics.
+
+\textbf{Gauge orbits and invariants.} Because $\Spin(3)$ acts by isometries on
+itself, a global left action $q\mapsto gq$ defines a gauge orbit. GSM attention
+depends only on relative rotations, so it is invariant to this global choice,
+and the associated outputs transform equivariantly (SI Theorem~S9). This means
+that the physically meaningful content of a representation is encoded in
+gauge-invariant observables such as geodesic distances, diffusion weights, and
+energies like $\mathcal{E}_{\mathrm{geo}}$. In a geometric view, learning is the
+selection of a gauge class of operator families rather than a specific global
+orientation.
+
+\textbf{Continuum limit and stability.} The Markov operator $P$ is a discrete
+approximation to a heat semigroup; its non-expansivity on bounded values is a
+finite-dimensional analogue of contractivity of diffusion. Combined with the
+small-angle expansion, this stability ensures that the Euclidean limit is not
+a singular perturbation but a controlled asymptotic: the operator varies
+smoothly with curvature parameters, and attention weights change continuously
+as the geometry departs from flatness. This provides a principled foundation
+for interpreting the transition from Euclidean to curved regimes.
+
+\textbf{Interpretability as geometry.} A geometric operator family exposes
+coordinate-free observables: rotor angles, geodesic distances, and diffusion
+concentration. These quantities are invariant under global gauge, and they are
+structural rather than heuristic. This yields a direct glass-box
+interpretability for language-modeling and reasoning: attention weights are a
+heat-kernel on $\Spin(3)$, and depth is a controlled accumulation of curvature.
+
+\textbf{Geometric observables.} A canonical structural observable is the
+geodesic Dirichlet energy of a rotor path $(R_1,\dots,R_T)$ along a sequence,
+\begin{equation}
+  \mathcal{E}_{\mathrm{geo}}=\frac12\sum_{t=1}^T\sum_{j\in\mathcal{N}(t)}
+  w_{|j-t|}\,\dgeo(R_t,R_j)^2,
+\end{equation}
+where $\mathcal{N}(t)$ is a local neighborhood and $w_{|j-t|}$ are weights.
+In the small-angle regime, $\mathcal{E}_{\mathrm{geo}}$ reduces to a quadratic
+energy in Lie-algebra coordinates; beyond that regime, it measures genuinely
+curved interactions. Such observables allow one to quantify when a model exits
+the flat regime and enters higher-curvature dynamics without appealing to
+task-specific criteria.
+
+\textbf{Curvature scales.} A simple dimensionless curvature proxy is
+\begin{equation}
+  \kappa_{\mathrm{eff}}=\frac{\mathbb{E}[\dgeo(\mu_i,r_j)^2]}{2\tau_h},
+\end{equation}
+which compares average geodesic separation to the diffusion scale. When
+$\kappa_{\mathrm{eff}}\ll 1$, GSM behaves nearly Euclidean; when
+$\kappa_{\mathrm{eff}}=O(1)$, curvature strongly shapes attention weights. This
+quantifies the regime in which the Euclidean limit is accurate and clarifies
+how depth-accumulated curvature interacts with diffusion scale.
+
+\textbf{Geometric view of reasoning.} In the RGAT frame, a sequence is a path
+on $\Spin(3)$ and composition corresponds to concatenation of rotations. The
+diffusion operator propagates information along this path according to
+geodesic proximity, and the resulting attention weights encode a geometric
+notion of relational relevance. Reasoning can therefore be interpreted as
+transport of local frames along a curved manifold, rather than as purely
+algebraic aggregation. This shifts the conceptual question from ``which tokens
+attend'' to ``how rotations compose,'' a distinction that is especially natural
+in physical and geometric settings.
+
+From this perspective, depth is not merely a stack of nonlinearities but an
+ordered sequence of small rotations whose noncommutativity yields emergent
+curvature. The BCH commutator sum quantifies the accumulated deviation from
+flatness, and the diffusion scale $\tau_h$ controls how tightly information is
+transported along geodesics. The combination of these two parameters
+(depth-induced curvature and diffusion scale) defines the effective geometry of
+reasoning at inference time.
+
+\textbf{Tangent-space linearization.} In the small-angle regime, the logarithm
+map identifies a neighborhood of the identity in $\Spin(3)$ with a ball in
+$\R^3$. Within this neighborhood, geodesic distance reduces to Euclidean
+distance and GSM reduces to a Gaussian kernel in the Lie algebra. Thus the
+standard Transformer can be viewed as operating in a moving tangent space that
+is re-identified at each layer. The RGAT formulation makes this identification
+explicit and specifies the regime in which the linearization is controlled.
+The curvature terms in the BCH expansion quantify precisely how far the
+operator family departs from a purely Euclidean accumulation of updates.
+
+In physical language, this is a discrete analogue of a connection on a bundle:
+local coordinates linearize the manifold, but global transport accumulates
+holonomy. The RGAT operator family therefore reconciles two seemingly
+contradictory facts: standard attention is locally Euclidean, yet deep
+composition can realize intrinsically curved dynamics. This resolves the
+question of how a linear-algebraic architecture can express non-Euclidean
+structure without explicitly encoding curvature at each step.
+
+\textbf{Figure guide.} Figure~\ref{fig:conceptual-bridge} visualizes the
+geometric lift of attention from Euclidean dot products to geodesic diffusion
+on $\Spin(3)$. Figure~\ref{fig:empirical-validation} (Figure~2) shows the empirical scaling
+that mirrors the $O(\varepsilon^2)$ and $O(L\varepsilon^2)$ bounds proved in the
+SI; the analytic bridge schematic appears in the SI (Figure~S1).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\linewidth]{figure_1_conceptual_bridge.pdf}
+\caption{\textbf{The Conceptual Bridge.}
+Heat-kernel attention on $\Spin(3)$: query (red star) and keys (blue circles)
+connected by geodesic arcs, color-coded by attention weight $K_{ij} = e^{-d_{\rm geo}^2/2\tau}$.
+Inset: in the flat-chart limit ($\varepsilon \to 0$), geodesic distance reduces to
+Euclidean distance and GSM becomes a standard Gaussian kernel.}
+\label{fig:conceptual-bridge}
+\end{figure}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.98\textwidth]{figure_3_empirical_validation.pdf}
+\caption{\textbf{Empirical Validation.}
+(a) Head-level attention error $\|P^{\rm GSM} - P^{\rm std}\|_\infty$ vs.\ $\varepsilon$
+on log-log axes; fitted slope $m \approx 1.96$ confirms $O(\varepsilon^2)$ scaling.
+(b) Depth-accumulated error scales linearly with $L$ at fixed $\varepsilon = 0.1$;
+inset shows BCH commutator curvature growth.
+Code and seeds included; experiment runs in ${\sim}7$\,s on CPU.}
+\label{fig:empirical-validation}
+\end{figure*}
+
+\section*{Supplementary Information}
+Line-by-line derivations and proofs are provided in
+\path{docs/papers/tex/nature_paper/si_rgat_nature.tex}.
+
+\textbf{Cross-references.} See SI Lemma~S1 for sign invariance of $\dgeo$,
+SI Lemmas~S2--S3 and Theorem~S4 for the Bridge Theorem, SI Theorem~S5 and
+Corollary~S6 for the diffusion operator and its stability, SI Theorem~S9 for
+bi-invariant gauge equivariance, SI Theorems~S10--S11 for geodesic alignment,
+and SI Lemma~S12, Theorem~S13, and Corollary~S14 for depth-accumulated
+curvature.
+
+\section*{Related Work and Positioning}
+This work intersects geometric mechanics, Lie group methods, and diffusion
+geometry. Heat-kernel diffusion and geodesic metrics motivate the GSM operator,
+while Clifford algebra provides a concrete representation of $\Spin(3)$ and its
+orthogonal actions. The central novelty is not a new optimization recipe but a
+structural identification: standard Transformer attention is a flat limit of a
+Riemannian operator family, and depth accumulates curvature in a controlled
+BCH expansion. This reframes attention as a geometric diffusion process and
+connects deep composition to a rotor flow on $\Spin(3)$.
+
+From a geometric-analytic perspective, the GSM kernel is a discrete analogue of
+the heat kernel on a compact manifold, and the resulting operator family can be
+interpreted as a diffusion map on $\Spin(3)$. This positions attention within
+classical spectral geometry: the spectrum of the associated Laplacian encodes
+the long-range structure of representations, while the short-time kernel
+captures local curvature. In this language, the dot-product Transformer is the
+Euclidean tangent approximation to the same operator family.
+
+From a mechanics perspective, rotors are the natural coordinates for rigid-body
+orientation; the BCH commutator terms therefore quantify noncommutativity of
+rotational composition. Depth-accumulated curvature is then the discrete-time
+analog of curvature emerging from sequential rotations. This framing is
+particularly suited to physicists and geometers: it ties attention to the
+geometry of $\Spin(3)$ rather than to an arbitrary linear algebraic choice.
+
+\section*{Mathematical Consequences}
+\textbf{Uniqueness of the geometric lift.} On a compact simple Lie group such
+as $\Spin(3)\cong \mathrm{SU}(2)$, the bi-invariant metric is unique up to
+scale. Consequently, the geodesic distance used in GSM is not an arbitrary
+design choice but the canonical distance compatible with the group structure.
+This reduces the space of admissible geometries and explains why the RGAT lift
+is mathematically rigid: once the group is chosen, the geometry is essentially
+fixed (up to scale), with the scale set by the unit-sphere normalization of
+rotors.
+\textbf{Geometry as an operator invariant.} The GSM kernel depends only on
+geodesic distance, so it is invariant under global group actions and depends
+only on the relative configuration of rotors. In the Euclidean limit this
+invariance becomes translational invariance in the tangent space; beyond the
+limit it encodes full group symmetry. This shift from Euclidean translation to
+group equivariance is the precise sense in which RGAT replaces linear algebra
+with geometric mechanics.
+\textbf{Expressivity by curvature.} The bridge and depth-accumulation theorems
+imply that expressivity arises not only from depth but from curvature induced
+by noncommutativity. The commutator terms are the first nontrivial departure
+from linearity, and their scaling with depth quantifies how many layers are
+needed to achieve a given curvature scale. This provides a quantitative lens
+for understanding when standard Transformers can emulate curved dynamics and
+when a geometry-native formulation is required.
+
+\section*{Outlook}
+The principal consequence is conceptual: Transformers can be analyzed as
+approximate rotor flows with curvature emerging from depth. This suggests a
+mathematical program for studying representation geometry, stability, and
+symmetry directly in the operator calculus of $\Spin(3)$. The supplement
+provides the formal derivations needed to make this program rigorous.
+
+A natural direction is to connect curvature scales to spectral gaps and mixing
+times of the diffusion operator, thereby relating depth to long-range
+information propagation on the manifold. Another is to study the stability of
+the Euclidean limit under perturbations of the metric, clarifying which aspects
+of standard attention are robust to geometric deformation. These questions are
+inherently mathematical: they concern the structure of the operator family and
+its invariants, not empirical tuning.
+
+\section*{Supplementary Manuscript}
+The complete RGAT technical manuscript (including full derivations and
+extended context) is provided in:
+\begin{flushleft}\small
+\path{docs/papers/tex/core_rgat_paper/}\\
+\path{riemannian_geometric_algebra_transformer_research_publication_concise.tex}
+\end{flushleft}
+
+\section*{Acknowledgments}
+Thanks to the open-source geometric algebra community for foundational tools
+and references.
+
+\begin{thebibliography}{9}
+\bibitem{vaswani2017attention}
+Vaswani, A. \emph{et al.} Attention is all you need. (2017).
+\bibitem{hestenes2015spacetime}
+Hestenes, D. \emph{et al.} Spacetime Algebra (2015).
+\bibitem{coifman2006diffusion}
+Coifman, R. and Lafon, S. Diffusion maps. (2006).
+\end{thebibliography}
+
+\end{document}

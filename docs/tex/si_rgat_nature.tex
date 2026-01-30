@@ -1,0 +1,486 @@
+\documentclass[10pt]{article}
+
+% Basic packages
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsthm}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage{mathptmx}
+
+\title{Supplementary Information: Riemannian Geometric Algebra Transformers}
+\author{Zachary Joseph}
+\date{\today}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Cl}{\mathrm{Cl}}
+\newcommand{\Spin}{\mathrm{Spin}}
+\newcommand{\dgeo}{d_{\mathrm{geo}}}
+\newcommand{\inner}[2]{\langle #1,#2 \rangle}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\Log}{\operatorname{Log}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\numberwithin{theorem}{section}
+\renewcommand{\thetheorem}{S\arabic{theorem}}
+
+\begin{document}
+\maketitle
+
+\section*{Supplementary Information: Proofs}
+\textbf{Result Index (S1--S14).}\par\medskip
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Label & Result \\
+\midrule
+S1 & \hyperlink{S1}{Lemma: Sign invariance of the distance} \\
+S2 & \hyperlink{S2}{Lemma: Small-angle distance expansion} \\
+S3 & \hyperlink{S3}{Lemma: Softmax stability} \\
+S4 & \hyperlink{S4}{Theorem: Bridge Theorem (Euclidean limit)} \\
+S5 & \hyperlink{S5}{Theorem: GSM attention is a Markov diffusion operator} \\
+S6 & \hyperlink{S6}{Corollary: Non-expansive bounds} \\
+S7 & \hyperlink{S7}{Lemma: Exact truncation identity} \\
+S8 & \hyperlink{S8}{Corollary: Truncation bound} \\
+S9 & \hyperlink{S9}{Theorem: Gauge equivariance of GSM attention} \\
+S10 & \hyperlink{S10}{Theorem: Geodesic alignment gradient on $S^3$} \\
+S11 & \hyperlink{S11}{Corollary: Structural learning as geodesic alignment} \\
+S12 & \hyperlink{S12}{Lemma: Iterated BCH accumulation} \\
+S13 & \hyperlink{S13}{Theorem: Depth accumulates curvature} \\
+S14 & \hyperlink{S14}{Corollary: Standard attention approximates rotor flow} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{Definitions.} Let $q,k\in\Spin(3)\subset S^3$ be unit quaternions with
+sign-invariant similarity $s(q,k)=|\langle q,k\rangle|$. Define the geodesic
+distance used in RGAT as $\dgeo(q,k)=2\arccos(s(q,k))$ with the principal
+branch. The principal log map $\Log_q$ is defined on
+$\Spin(3)\setminus\{-q\}$ (the cut locus) so that $k=\exp_q(\Log_q(k))$ and
+$\|\Log_q(k)\|=\dgeo(q,k)/2$.
+We use the standard bi-invariant (round) metric induced by the embedding
+$S^3\subset\R^4$. The exponential map is defined by
+$\exp(u)=\cos\|u\| + (\sin\|u\|/\|u\|)\,u$ for $u\in\R^3$ (with the convention
+$\exp(0)=1$), so $\|u\|$ is the half-angle of the corresponding rotation.
+All vector norms $\|\cdot\|$ are Euclidean norms induced by the chosen
+bi-invariant metric; operator norms use the induced $\ell_2$ or
+row-wise $\ell_\infty$ conventions as stated.
+
+\begin{center}
+\fbox{\parbox{0.92\linewidth}{
+\textbf{Algorithm sketch (GSM attention).}\\
+Inputs: rotor queries $\mu_i$, rotor keys $r_j$, values $v_j$, temperature $\tau_h$.\\
+1) Project to rotor subspace and normalize: $\mu_i\leftarrow P_{\mathrm{rot}}(\mu_i)$, $r_j\leftarrow P_{\mathrm{rot}}(r_j)$.\\
+2) Compute sign-invariant geodesic distances: $d_{ij}=\dgeo(\mu_i,r_j)$.\\
+3) Form kernel logits: $\ell_{ij}=-(2\tau_h)^{-1}d_{ij}^2$.\\
+4) Row-normalize: $P_{ij}=\exp(\ell_{ij})/\sum_k\exp(\ell_{ik})$.\\
+5) Mix values: $\tilde{v}_i=\sum_j P_{ij}v_j$.\\
+6) If values live in rotor fibers, renormalize to the manifold after mixing.
+}}
+\end{center}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\linewidth]{figure_2_bridge_theorem.pdf}
+\caption{\textbf{Figure S1: The Bridge Theorem schematic.}
+(a) GSM heat kernel vs.\ standard softmax kernel as functions of geodesic angle;
+kernels match in the small-angle regime (shaded).
+(b) Error bound schematic: head-level error scales as $O(\varepsilon^2)$ (Theorem~S4),
+stack-level error as $O(L\varepsilon^2)$ (Corollary~S14).}
+\label{fig:bridge-theorem-si}
+\end{figure}
+
+\hypertarget{S1}{}\begin{lemma}[Sign invariance of the distance]\label{lem:sign-invariance}
+For any unit quaternions $q,k\in S^3$, the geodesic distance satisfies
+\[
+\dgeo(q,k)=\dgeo(-q,k)=\dgeo(q,-k).
+\]
+\end{lemma}
+\begin{proof}
+By definition, $s(q,k)=|\langle q,k\rangle|$. Because
+$\langle -q,k\rangle=-\langle q,k\rangle$ and
+$\langle q,-k\rangle=-\langle q,k\rangle$, we have
+$s(-q,k)=s(q,-k)=s(q,k)$. Therefore
+\[
+\dgeo(-q,k)=2\arccos(s(-q,k))=2\arccos(s(q,k))=\dgeo(q,k),
+\]
+and similarly for $\dgeo(q,-k)$. \qedhere
+\end{proof}
+
+\hypertarget{S2}{}\begin{lemma}[Small-angle distance expansion]\label{lem:small-angle}
+Let $u,v\in\R^3$ with $\|u\|,\|v\|\le \varepsilon$ and
+$0<\varepsilon\le\varepsilon_0$, where $\varepsilon_0$ lies below the
+injectivity radius. Define $q=\exp(u)$ and $k=\exp(v)$ in $\Spin(3)$. Then
+there exists $C_{\mathrm{geo}}>0$ (depending only on the chosen bi-invariant
+metric and uniform bounds on the Lie bracket structure constants for
+$\mathfrak{spin}(3)$) such that
+\[
+\big|\dgeo(q,k)^2 - 4\|u-v\|^2\big| \le C_{\mathrm{geo}}\,\varepsilon^4.
+\]
+\end{lemma}
+\begin{proof}
+Let $q=\exp(u)$ and $k=\exp(v)$. The relative rotor is
+\[
+q^*k=\exp(-u)\exp(v).
+\]
+By the Baker--Campbell--Hausdorff expansion,
+\[
+\exp(-u)\exp(v)=\exp\!\left(v-u+\tfrac12[v,-u]+O(\varepsilon^3)\right).
+\]
+Let $w$ be the BCH log and write $a=v-u$, $c=\tfrac12[v,-u]$, and $r$ for the
+remainder with $\|r\|\le C_1\varepsilon^3$. Then $w=a+c+r$ with
+$\|a\|=O(\varepsilon)$ and $\|c\|=O(\varepsilon^2)$. For the bi-invariant
+metric on $\mathfrak{spin}(3)$, $\mathrm{ad}_a$ is skew-adjoint, hence
+$\langle a,[a,z]\rangle=0$ for all $z$; in particular $\langle a,c\rangle=0$.
+Therefore
+\[
+\|w\|^2=\|a\|^2+2\langle a,r\rangle+\|c\|^2+2\langle c,r\rangle+\|r\|^2,
+\]
+so $\|w\|=\|a\|+O(\varepsilon^3)$. Because $\dgeo(q,k)=2\|w\|$, we obtain
+\[
+\dgeo(q,k)^2 = 4\|w\|^2
+            = 4\|u-v\|^2 + O(\varepsilon^4),
+\]
+which yields the stated bound after absorbing constants. \qedhere
+\end{proof}
+
+\hypertarget{S3}{}\begin{lemma}[Softmax stability]\label{lem:softmax-stability}
+For any $\ell,\ell'\in\R^T$, the softmax $\sigma$ satisfies
+\[
+\|\sigma(\ell)-\sigma(\ell')\|_\infty \le \tfrac12\|\ell-\ell'\|_\infty.
+\]
+\end{lemma}
+\begin{proof}
+The Jacobian of $\sigma$ is
+$J(\ell)=\mathrm{diag}(\sigma(\ell))-\sigma(\ell)\sigma(\ell)^\top$.
+Each row sums to zero and has entries bounded by
+$\sigma_i(1-\sigma_i)\le \tfrac14$. The $\ell_\infty$ operator norm is the
+maximum absolute row sum, and row $i$ has absolute sum
+$\sigma_i(1-\sigma_i)+\sum_{j\ne i}\sigma_i\sigma_j=2\sigma_i(1-\sigma_i)$, hence
+\[
+\|J(\ell)\|_{\infty\to\infty}\le \sup_i 2\sigma_i(1-\sigma_i)\le \tfrac12.
+\]
+By the mean value theorem applied along the line segment from $\ell$ to
+$\ell'$, we obtain
+\[
+\|\sigma(\ell)-\sigma(\ell')\|_\infty
+\le \sup_{t\in[0,1]}\|J(\ell+t(\ell'-\ell))\|_{\infty\to\infty}
+\|\ell-\ell'\|_\infty \le \tfrac12\|\ell-\ell'\|_\infty.
+\]
+\qedhere
+\end{proof}
+
+\hypertarget{S4}{}\begin{theorem}[Bridge Theorem: Euclidean limit]\label{thm:bridge}
+Let $Q,K\in\R^{T\times 3}$ with $\|Q_i\|,\|K_j\|\le\varepsilon$ and
+$0<\varepsilon\le\varepsilon_0$, $\tau\ge\tau_{\min}>0$. Define rotors
+$R(Q_i),R(K_j)\in\Spin(3)$ and let
+$\|\cdot\|_{\infty,2}$ denote the max-row $\ell_2$ norm on sequences. Let GSM
+logits be $\ell^{\mathrm{GSM}}_{ij}=-(2\tau)^{-1}\dgeo(R(Q_i),R(K_j))^2$ and
+standard logits be $\ell^{\mathrm{std}}_{ij}=\tau^{-1}Q_i^\top K_j$. Then there
+exists a constant $C_{\mathrm{head}}$ depending only on $\tau_{\min}$ and
+$C_{\mathrm{geo}}$ such that
+\[
+\|P^{\mathrm{GSM}}-P^{\mathrm{softmax}}\|_\infty \le C_{\mathrm{head}}\,
+\varepsilon^2,
+\]
+and for a depth-$L$ stack of Lipschitz layers, a constant
+$C_{\mathrm{stack}}$ such that
+\[
+\|\mathcal{F}_{\mathrm{RGAT}}-\mathcal{F}_{\mathrm{Transformer}}\|
+\le C_{\mathrm{stack}}\,\varepsilon^2,
+\]
+where each layer is $L_\ell$-Lipschitz with respect to
+$\|\cdot\|_{\infty,2}$ and $C_{\mathrm{stack}}=C_{\mathrm{head}}\prod_\ell L_\ell$.
+\end{theorem}
+\begin{proof}
+By Lemma~\ref{lem:small-angle}, for each $i,j$,
+\[
+\dgeo(R(Q_i),R(K_j))^2 = 4\|Q_i-K_j\|^2 + O(\varepsilon^4).
+\]
+Expanding the square gives
+\[
+\|Q_i-K_j\|^2=\|Q_i\|^2+\|K_j\|^2-2Q_i^\top K_j.
+\]
+Substituting into the GSM logit yields
+\[
+\ell^{\mathrm{GSM}}_{ij}
+=\frac{1}{\tau}Q_i^\top K_j-\frac{1}{2\tau}\|K_j\|^2
+ -\frac{1}{2\tau}\|Q_i\|^2+O(\varepsilon^4).
+\]
+For fixed $i$, the term $-\|Q_i\|^2/(2\tau)$ is constant across $j$ and cancels
+inside the row-wise softmax, so
+\[
+\|\ell^{\mathrm{GSM}}_{i\cdot}-\ell^{\mathrm{std}}_{i\cdot}\|_\infty
+\le C\varepsilon^2
+\]
+for a constant $C$ depending on $\tau_{\min}$, the metric choice, and the
+Lie-bracket bound encapsulated in $C_{\mathrm{geo}}$, as well as the bound
+$\max_j\|K_j\|^2\le \varepsilon^2$; the $O(\varepsilon^4)$ remainder is
+absorbed into $C\varepsilon^2$ for $\varepsilon\le 1$. Applying
+Lemma~\ref{lem:softmax-stability} row-wise gives
+\[
+\|P^{\mathrm{GSM}}-P^{\mathrm{softmax}}\|_\infty\le \tfrac12 C\varepsilon^2
+= C_{\mathrm{head}}\varepsilon^2.
+\]
+For a depth-$L$ stack of Lipschitz layers $F_\ell$ with constants $L_\ell$,
+the discrepancy propagates as
+\[
+\Delta_{L}\le \Big(\prod_{\ell=1}^L L_\ell\Big)\Delta_1,
+\]
+yielding the stated stack-level bound with
+$C_{\mathrm{stack}}=C_{\mathrm{head}}\prod_{\ell=1}^L L_\ell$. \qedhere
+\end{proof}
+
+\hypertarget{S5}{}\begin{theorem}[GSM attention is a Markov diffusion operator]\label{thm:markov}
+Let $K_{ij}=\exp(-\dgeo(\mu_i,r_j)^2/(2\tau))$ and
+$P_{ij}=K_{ij}/\sum_k K_{ik}$. Then each row of $P$ is a probability
+distribution. For any value vectors $\{v_j\}$, the output
+$y_i=\sum_j P_{ij}v_j$ lies in the convex hull of $\{v_j\}$.
+\end{theorem}
+\begin{proof}
+For all $i,j$, $K_{ij}>0$ because it is an exponential of a real number.
+Therefore
+\[
+P_{ij}=\frac{K_{ij}}{\sum_k K_{ik}}\ge 0.
+\]
+Summing over $j$ gives
+\[
+\sum_j P_{ij}=\frac{\sum_j K_{ij}}{\sum_k K_{ik}}=1,
+\]
+so each row is a probability distribution. Thus
+\[
+y_i=\sum_j P_{ij}v_j
+\]
+is a convex combination of the values and therefore lies in their convex hull.
+\qedhere
+\end{proof}
+
+\hypertarget{S6}{}\begin{corollary}[Non-expansive bounds]\label{cor:nonexpansive}
+If $\|v_j\|\le V_{\max}$ for all $j$, then $\|y_i\|\le V_{\max}$ and
+$\|y_i-y_i'\|\le \max_j\|v_j-v_j'\|$ for two value sets $\{v_j\},\{v_j'\}$.
+\end{corollary}
+\begin{proof}
+Because $y_i$ is a convex combination,
+\[
+\|y_i\|\le \sum_j P_{ij}\|v_j\|\le \sum_j P_{ij}V_{\max}=V_{\max}.
+\]
+For two value sets, write
+\[
+y_i-y_i'=\sum_j P_{ij}(v_j-v_j').
+\]
+Taking norms and using convexity,
+\[
+\|y_i-y_i'\|\le \sum_j P_{ij}\|v_j-v_j'\|
+\le \max_j\|v_j-v_j'\|.
+\]
+\qedhere
+\end{proof}
+
+\hypertarget{S7}{}\begin{lemma}[Exact truncation identity]\label{lem:trunc-id}
+Let $S_i$ be a candidate set for query $i$, define
+$p_i=\sum_{j\in S_i}P_{ij}$ and $\delta_i=1-p_i$. For $p_i>0$, define
+$\tilde{P}_{ij}=P_{ij}/p_i$ for $j\in S_i$ and
+$\mu_{S_i}=\sum_{j\in S_i}\tilde{P}_{ij}v_j$. For $\delta_i>0$, define the
+complement mean
+$\mu_{S_i^c}=\delta_i^{-1}\sum_{j\notin S_i}P_{ij}v_j$. Then
+\[
+y_i-\tilde{y}_i=\delta_i(\mu_{S_i^c}-\mu_{S_i}),
+\]
+with the convention $y_i-\tilde{y}_i=0$ when $\delta_i=0$.
+\end{lemma}
+\begin{proof}
+Write the full output as
+\[
+y_i=\sum_{j\in S_i}P_{ij}v_j+\sum_{j\notin S_i}P_{ij}v_j
+=p_i\mu_{S_i}+\delta_i\mu_{S_i^c}.
+\]
+By definition, $\tilde{y}_i=\mu_{S_i}$. Therefore
+\[
+y_i-\tilde{y}_i=(p_i\mu_{S_i}+\delta_i\mu_{S_i^c})-\mu_{S_i}
+=\delta_i(\mu_{S_i^c}-\mu_{S_i}),
+\]
+which proves the identity. \qedhere
+\end{proof}
+
+\hypertarget{S8}{}\begin{corollary}[Truncation bound]\label{cor:trunc-bound}
+If $\|v_j\|\le V_{\max}$ for all $j$, then
+\[
+\|y_i-\tilde{y}_i\|\le 2V_{\max}\,\delta_i.
+\]
+\end{corollary}
+\begin{proof}
+By Lemma~\ref{lem:trunc-id},
+\[
+\|y_i-\tilde{y}_i\|=\delta_i\|\mu_{S_i^c}-\mu_{S_i}\|.
+\]
+Both $\mu_{S_i^c}$ and $\mu_{S_i}$ are convex combinations of values, so
+$\|\mu_{S_i^c}\|\le V_{\max}$ and $\|\mu_{S_i}\|\le V_{\max}$. Thus
+\[
+\|\mu_{S_i^c}-\mu_{S_i}\|\le \|\mu_{S_i^c}\|+\|\mu_{S_i}\|
+\le 2V_{\max}.
+\]
+Multiplying by $\delta_i$ yields the bound. \qedhere
+\end{proof}
+
+\hypertarget{S9}{}\begin{theorem}[Gauge equivariance of GSM attention]\label{thm:gauge-equiv}
+Assume $\dgeo$ is the geodesic distance induced by the bi-invariant metric on
+$\Spin(3)$. Let $g\in\Spin(3)$ act on rotors by left multiplication. Define
+transformed queries $\mu_i'=g\mu_i$ and keys $r_j'=gr_j$. Then
+$\dgeo(\mu_i',r_j')=\dgeo(\mu_i,r_j)$, and hence
+$P'_{ij}=P_{ij}$. If values transform linearly by an orthogonal representation
+$L(g)$ (so $\|L(g)v\|=\|v\|$), then
+$y_i' = L(g)y_i$.
+\end{theorem}
+\begin{proof}
+Because $\Spin(3)$ acts by isometries on itself,
+\[
+\dgeo(g\mu_i,gr_j)=\dgeo(\mu_i,r_j).
+\]
+Therefore
+\[
+K'_{ij}=\exp\!\left(-\frac{\dgeo(g\mu_i,gr_j)^2}{2\tau}\right)
+       =\exp\!\left(-\frac{\dgeo(\mu_i,r_j)^2}{2\tau}\right)=K_{ij},
+\]
+and the row normalization is identical, yielding $P'_{ij}=P_{ij}$. For values,
+\[
+y_i'=\sum_j P'_{ij}v_j'=\sum_j P_{ij}L(g)v_j=L(g)\sum_j P_{ij}v_j=L(g)y_i.
+\]
+\qedhere
+\end{proof}
+
+\hypertarget{S10}{}\begin{theorem}[Geodesic alignment gradient on $S^3$]\label{thm:geo-grad}
+Let $q,r\in S^3$ with $q\neq -r$, and choose the sign of $r$ so that
+$\langle q,r\rangle>0$. Define
+$f(q)=\tfrac12\dgeo(q,r)^2$ with $\dgeo(q,r)=2\arccos(\langle q,r\rangle)$.
+Then the Riemannian gradient satisfies
+\[
+\nabla_R f(q) = -4\,\Log_q(r),
+\]
+and the unique minimizers are $q=\pm r$.
+\end{theorem}
+\begin{proof}
+We use the round metric induced by the embedding $S^3\subset\R^4$, so the
+Riemannian gradient is obtained by projecting the Euclidean gradient onto the
+tangent space.
+Let $s=\langle q,r\rangle\in(0,1]$ and $d=2\arccos(s)$, so
+$f(q)=\tfrac12 d^2$. By the chain rule,
+\[
+\frac{\partial f}{\partial q}= d\,\frac{\partial d}{\partial q}.
+\]
+Since $d=2\arccos(s)$, we have
+\[
+\frac{\partial d}{\partial s}=-\frac{2}{\sqrt{1-s^2}},
+\qquad
+\frac{\partial s}{\partial q}=r,
+\]
+so
+\[
+\frac{\partial d}{\partial q}
+  = -\frac{2}{\sqrt{1-s^2}}\,r
+  \quad\Rightarrow\quad
+\frac{\partial f}{\partial q}
+  = -\frac{2d}{\sqrt{1-s^2}}\,r.
+\]
+The tangent projector on $S^3$ is $P_q=I-qq^\top$, hence
+\[
+\nabla_R f(q)=P_q\frac{\partial f}{\partial q}
+           = -\frac{2d}{\sqrt{1-s^2}}(r-sq).
+\]
+Because $\sin(d/2)=\sqrt{1-s^2}$, the log map on $S^3$ satisfies
+\[
+\Log_q(r)=\frac{d}{2\sin(d/2)}(r-sq).
+\]
+Substituting yields
+\[
+\nabla_R f(q)= -\frac{2d}{\sin(d/2)}(r-sq) = -4\,\Log_q(r).
+\]
+The norm of $\Log_q(r)$ vanishes iff $q=\pm r$, hence these are the unique
+minimizers. The case $q=r$ follows by continuity. \qedhere
+\end{proof}
+
+\hypertarget{S11}{}\begin{corollary}[Structural learning as geodesic alignment]\label{cor:geo-align}
+For a single-target energy $f(q)=\tfrac12\dgeo(q,r)^2$, the negative gradient
+flow $\dot{q}=-\nabla_R f(q)$ moves $q$ along the geodesic toward $r$ (up to
+sign), so learning structurally aligns rotors by minimizing geodesic distance.
+\end{corollary}
+\begin{proof}
+By Theorem~\ref{thm:geo-grad}, $\nabla_R f(q)$ is proportional to $\Log_q(r)$, which is the
+tangent vector of the unique minimal geodesic from $q$ to $r$ within the
+injectivity radius. Therefore the negative gradient flow follows that geodesic
+and converges to $q=\pm r$. \qedhere
+\end{proof}
+
+\hypertarget{S12}{}\begin{lemma}[Iterated BCH accumulation]\label{lem:iter-bch}
+Let $u_1,\dots,u_L\in\R^3$ satisfy $\|u_\ell\|\le \varepsilon$ and assume
+$0<\varepsilon\le\varepsilon_0/L$ so that $L\varepsilon$ lies below the
+injectivity radius and $L\varepsilon\le 1$. Then there exists
+$w_L\in\R^3$ such that
+\[
+\exp(u_1)\exp(u_2)\cdots\exp(u_L)=\exp(w_L),
+\]
+and constants $C_1,C_2>0$ (depending only on the bi-invariant metric and
+Lie bracket constants) such
+that
+\[
+\Big\|w_L-\sum_{\ell=1}^L u_\ell-\frac12\sum_{1\le i<j\le L}[u_i,u_j]\Big\|
+\le C_1 L^3\varepsilon^3
+\quad\text{and}\quad
+\|w_L-\sum_{\ell=1}^L u_\ell\|\le C_2 L^2\varepsilon^2.
+\]
+\end{lemma}
+\begin{proof}
+For $L=2$, the BCH formula gives
+$\exp(u_1)\exp(u_2)=\exp(u_1+u_2+\tfrac12[u_1,u_2]+R_2)$ with
+$\|R_2\|\le C\varepsilon^3$. Assume the statement holds for $L$ with
+$\exp(u_1)\cdots\exp(u_L)=\exp(w_L)$ and $\|w_L\|\le L\varepsilon+C'L^2\varepsilon^2$.
+Applying BCH to $\exp(w_L)\exp(u_{L+1})$ yields
+\[
+\exp(w_L)\exp(u_{L+1})=\exp\!\left(w_L+u_{L+1}+\tfrac12[w_L,u_{L+1}]+R_{L+1}\right),
+\]
+with $\|R_{L+1}\|\le C\|w_L\|^3\le C L^3\varepsilon^3$. Expanding
+$[w_L,u_{L+1}]$ and collecting commutator terms adds
+$\tfrac12\sum_{i=1}^L [u_i,u_{L+1}]$ plus a remainder controlled by
+$O(L^3\varepsilon^3)$. Induction gives the stated bounds after absorbing
+constants; the second bound follows because $L\varepsilon\le 1$ so
+$L^3\varepsilon^3\le L^2\varepsilon^2$. \qedhere
+\end{proof}
+
+\hypertarget{S13}{}\begin{theorem}[Depth accumulates curvature]\label{thm:depth-curv}
+Let $u_1,\dots,u_L\in\R^3$ be small-angle generators with $\|u_\ell\|\le\varepsilon$
+and let $Q_L=\prod_{\ell=1}^L \exp(u_\ell)$. Then there exists $w_L$ such that
+$Q_L=\exp(w_L)$ and
+\[
+w_L=\sum_{\ell=1}^L u_\ell + \frac12\sum_{1\le i<j\le L}[u_i,u_j]+R_L,
+\quad \|R_L\|\le C L^3\varepsilon^3.
+\]
+Consequently, even when each step is small-angle (Euclidean regime), the
+composed motion includes commutator curvature of size $O(L^2\varepsilon^2)$.
+\end{theorem}
+\begin{proof}
+The expansion is immediate from Lemma~\ref{lem:iter-bch}. The commutator sum
+is $O(L^2\varepsilon^2)$ because each $[u_i,u_j]$ is $O(\varepsilon^2)$ and
+there are $O(L^2)$ pairs. \qedhere
+\end{proof}
+
+\hypertarget{S14}{}\begin{corollary}[Standard attention approximates rotor flow]\label{cor:std-rotor}
+Assume the Bridge Theorem hypotheses and that each layer operates in the
+small-angle regime with generators $u_\ell$. Then a depth-$L$ standard
+Transformer stack approximates the corresponding rotor flow with error
+$O(L\varepsilon^2)$ in attention weights (for uniformly bounded Lipschitz
+constants), while the effective generator
+includes commutator curvature as in Theorem~\ref{thm:depth-curv}.
+\end{corollary}
+\begin{proof}
+By Theorem~\ref{thm:bridge}, each layer's GSM attention differs from standard
+attention by $O(\varepsilon^2)$. Accumulating over $L$ layers gives an
+$O(L\varepsilon^2)$ discrepancy when the layer Lipschitz constants are
+uniformly bounded. The effective rotor flow is the product of per-layer
+exponentials, whose
+generator expansion is given by Theorem~\ref{thm:depth-curv}. \qedhere
+\end{proof}
+
+\end{document}
