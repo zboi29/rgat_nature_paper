@@ -1,6 +1,6 @@
-# RGAT: Relational Graph Attention Networks (Nature Paper)
+# RGAT: Riemannian Geometric-Algebra Transformers (Nature Paper)
 
-This repository contains the official code and formal verification artifacts for the paper **"Relational Graph Attention Networks"**.
+This repository contains the official code and formal verification artifacts for the paper **"Riemannian Geometric-Algebra Transformers: A Curved-Geometry Limit of Standard Attention"**.
 
 ## Overview
 

@@ -1,6 +1,6 @@
 # Scientific Reviewer's Guide
 
-Welcome to the code repository for **"Relational Graph Attention Networks"**. This document is intended for editors, peer reviewers, and researchers who wish to verify the scientific claims, mathematical proofs, and experimental results presented in the paper.
+Welcome to the code repository for **"Riemannian Geometric-Algebra Transformers"**. This document is intended for editors, peer reviewers, and researchers who wish to verify the scientific claims, mathematical proofs, and experimental results presented in the paper.
 
 ## 1. Repository & Paper Mapping
 

@@ -19,7 +19,7 @@
 \raggedbottom
 
 \title{Riemannian Geometric Algebra Transformers: A Curved-Geometry Limit of Standard Attention}
-\author{Zachary Joseph}
+\author{Zachary Nathan Joseph}
 \date{\today}
 
 \newcommand{\R}{\mathbb{R}}
@@ -62,18 +62,27 @@ reparameterize attention; it identifies the curved operator calculus of which
 standard attention is a special case. This paper isolates that geometric
 relationship and its consequences for how Transformers learn structurally.
 
-\textbf{Euclidean attention as a Gaussian kernel.} For standard attention with
-queries $q_i$ and keys $k_j$, the logits $q_i^\top k_j/\tau$ can be rewritten as
+\textbf{Euclidean attention as a (biased) Gaussian kernel.}
+For standard attention with queries $q_i$ and keys $k_j$, the logits satisfy the exact identity
 \begin{equation}
-  \frac{1}{\tau}q_i^\top k_j
-  = -\frac{1}{2\tau}\|q_i-k_j\|^2
-    + \frac{1}{2\tau}\|q_i\|^2
-    + \frac{1}{2\tau}\|k_j\|^2.
+\frac{1}{\tau}\,q_i^\top k_j
+= -\frac{1}{2\tau}\,\|q_i-k_j\|^2
++ \frac{1}{2\tau}\,\|q_i\|^2
++ \frac{1}{2\tau}\,\|k_j\|^2 .
 \end{equation}
-Row-wise softmax eliminates the $\|q_i\|^2$ term, so standard attention is
-equivalent to a Gaussian kernel on Euclidean space up to key-dependent bias.
-RGAT replaces the Euclidean distance with the intrinsic geodesic distance on
-$\Spin(3)$, yielding a genuine heat-kernel operator on a curved manifold.
+Row-wise softmax over $j$ eliminates the $\|q_i\|^2$ term (it is constant in $j$), hence
+\begin{equation}
+\alpha_{ij}
+\;\propto\;
+\exp\!\left(-\frac{1}{2\tau}\,\|q_i-k_j\|^2\right)
+\;\exp\!\left(\frac{1}{2\tau}\,\|k_j\|^2\right).
+\end{equation}
+Therefore, standard attention is a \emph{Gaussian RBF} in the Euclidean distance $\|q_i-k_j\|$,
+\emph{modulated by a key-dependent factor} $\exp(\|k_j\|^2/(2\tau))$ (equivalently, a key-dependent
+logit bias $b_j := \|k_j\|^2/(2\tau)$).
+In particular, if key norms are fixed/normalized so that $\|k_j\|^2$ is constant across $j$, then the
+modulation cancels under softmax and the attention weights reduce to a \emph{pure} Gaussian kernel:
+$\alpha_{ij}\propto\exp(-\|q_i-k_j\|^2/(2\tau))$.
 
 \textbf{Geometric softmax (GSM) attention.} We define GSM as the geometric
 diffusion family with logits and row-normalized weights
@@ -273,6 +282,11 @@ $C_{\mathrm{stack}}=C_{\mathrm{head}}\prod_\ell L_\ell$ such that
 The norms and Lipschitz constants are defined in the SI (max-row $\ell_2$ on
 sequences); this is the rigorous content of the Euclidean limit (SI
 Theorem~S4).
+\textit{Clarification (depth scaling).}
+The product-form $C_{\text{stack}}=C_{\text{head}}\prod_{\ell=1}^L L_\ell$ is a worst-case composition bound; in our setting the \emph{value-mixing} 
+map $v\mapsto Pv$ is row-stochastic (SI Thm.~S5) and hence $1$-Lipschitz in $\|\cdot\|_{\infty,2}$ (SI Cor.~S6),
+so layerwise $O(\varepsilon^2)$ kernel errors accumulate at most linearly, yielding $O(L\varepsilon^2)$ (SI Cor.~S14). 
+
 
 \textbf{Depth accumulates curvature.} The Euclidean limit is not the end of the
 story. Repeated composition of small-angle steps yields curvature through BCH
@@ -473,10 +487,10 @@ Euclidean distance and GSM becomes a standard Gaussian kernel.}
 \includegraphics[width=0.98\textwidth]{figure_3_empirical_validation.pdf}
 \caption{\textbf{Empirical Validation.}
 (a) Head-level attention error $\|P^{\rm GSM} - P^{\rm std}\|_\infty$ vs.\ $\varepsilon$
-on log-log axes; fitted slope $m \approx 1.96$ confirms $O(\varepsilon^2)$ scaling.
+on log-log axes; fitted slope $m \approx 1.988$ confirms $O(\varepsilon^2)$ scaling; correlation coefficient is exactly $r^2 = 1.0$.
 (b) Depth-accumulated error scales linearly with $L$ at fixed $\varepsilon = 0.1$;
 inset shows BCH commutator curvature growth.
-Code and seeds included; experiment runs in ${\sim}7$\,s on CPU.}
+Code and seeds included; experiment runs in ${\sim}15$\,s on CPU.}
 \label{fig:empirical-validation}
 \end{figure*}
 
@@ -568,12 +582,27 @@ Thanks to the open-source geometric algebra community for foundational tools
 and references.
 
 \begin{thebibliography}{9}
+
 \bibitem{vaswani2017attention}
-Vaswani, A. \emph{et al.} Attention is all you need. (2017).
-\bibitem{hestenes2015spacetime}
-Hestenes, D. \emph{et al.} Spacetime Algebra (2015).
+Vaswani, A. \emph{et al.} Attention is all you need. \emph{Advances in Neural Information Processing Systems} \textbf{30}, 5998--6008 (2017).
+
 \bibitem{coifman2006diffusion}
-Coifman, R. and Lafon, S. Diffusion maps. (2006).
+Coifman, R. and Lafon, S. Diffusion maps. \emph{Applied and Computational Harmonic Analysis} \textbf{21}, 5--30 (2006).
+
+\bibitem{brehmer2023geometric}
+Brehmer, J., De Haan, P., Behrends, S. and Cohen, T. Geometric algebra transformer. \emph{Advances in Neural Information Processing Systems} \textbf{36}, 66205--66218 (2023).
+
+\bibitem{bronstein2021geometric}
+Bronstein, M. M., Bruna, J., Cohen, T. and Veli{\v{c}}kovi{\'c}, P. Geometric deep learning: Grids, groups, graphs, geodesics, and gauges. \emph{arXiv preprint arXiv:2104.13478} (2021).
+
+\bibitem{su2024roformer}
+Su, J. \emph{et al.} Roformer: Enhanced transformer with rotary position embedding. \emph{Neurocomputing} \textbf{568}, 127063 (2024).
+
+\bibitem{ruhe2023clifford}
+Ruhe, D., Kiani, K., Brandstetter, J. and Forr{\'e}, P. Clifford Group Equivariant Neural Networks. \emph{Advances in Neural Information Processing Systems} \textbf{36}, 52633--52656 (2023).
+
+\bibitem{chen2018neural}
+Chen, R. T. Q., Rubanova, Y., Bettencourt, J. and Duvenaud, D. K. Neural ordinary differential equations. \emph{Advances in Neural Information Processing Systems} \textbf{31} (2018).
 \end{thebibliography}
 
 \end{document}

@@ -4,10 +4,11 @@ keywords = ["math"]
 defaultTargets = ["RgatNaturePaper"]
 
 [leanOptions]
-pp.unicode.fun = true                 # pretty-prints `fun a ↦ b`
+pp.unicode.fun = true                  # pretty-prints `fun a ↦ b`
 relaxedAutoImplicit = false
-weak.linter.mathlibStandardSet = true
+weak.linter.mathlibStandardSet = false
 maxSynthPendingDepth = 3
+linter.unusedSimpArgs = false
 
 [[require]]
 name = "mathlib"

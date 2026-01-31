@@ -10,9 +10,10 @@
 \usepackage{booktabs}
 \usepackage{microtype}
 \usepackage{mathptmx}
+\usepackage{float}
 
 \title{Supplementary Information: Riemannian Geometric Algebra Transformers}
-\author{Zachary Joseph}
+\author{Zachary Nathan Joseph}
 \date{\today}
 
 \newcommand{\R}{\mathbb{R}}
@@ -56,19 +57,94 @@ S14 & \hyperlink{S14}{Corollary: Standard attention approximates rotor flow} \\
 \bottomrule
 \end{tabular}
 \end{center}
-\textbf{Definitions.} Let $q,k\in\Spin(3)\subset S^3$ be unit quaternions with
-sign-invariant similarity $s(q,k)=|\langle q,k\rangle|$. Define the geodesic
-distance used in RGAT as $\dgeo(q,k)=2\arccos(s(q,k))$ with the principal
-branch. The principal log map $\Log_q$ is defined on
-$\Spin(3)\setminus\{-q\}$ (the cut locus) so that $k=\exp_q(\Log_q(k))$ and
-$\|\Log_q(k)\|=\dgeo(q,k)/2$.
+\subsection*{Definitions}
+
+\textbf{Manifold and group structure.}
+Let $q,k\in\Spin(3)\subset S^3$ be unit quaternions with
+sign-invariant similarity $s(q,k)=|\langle q,k\rangle|$, where
+$\langle q,k\rangle = \sum_{i=0}^3 q_i k_i$ is the standard Euclidean inner
+product in $\R^4$. Define the geodesic distance used in RGAT as
+$\dgeo(q,k)=2\arccos(s(q,k))$ with the principal branch; the factor of 2
+ensures $\dgeo$ measures arc length on the unit 3-sphere. The principal log
+map $\Log_q$ is defined on $\Spin(3)\setminus\{-q\}$ (the cut locus) so that
+$k=\exp_q(\Log_q(k))$ and $\|\Log_q(k)\|=\dgeo(q,k)/2$. The
+\emph{injectivity radius} of $\Spin(3)$ is $\pi$ (half the diameter of $S^3$);
+all small-angle expansions require arguments to lie strictly within this radius.
+
+\textbf{Metric and exponential map.}
 We use the standard bi-invariant (round) metric induced by the embedding
-$S^3\subset\R^4$. The exponential map is defined by
+$S^3\subset\R^4$. The exponential map at the identity is defined by
 $\exp(u)=\cos\|u\| + (\sin\|u\|/\|u\|)\,u$ for $u\in\R^3$ (with the convention
 $\exp(0)=1$), so $\|u\|$ is the half-angle of the corresponding rotation.
 All vector norms $\|\cdot\|$ are Euclidean norms induced by the chosen
 bi-invariant metric; operator norms use the induced $\ell_2$ or
-row-wise $\ell_\infty$ conventions as stated.
+row-wise $\ell_\infty$ conventions as stated. The notation $R(u)=\exp(u)$
+denotes the rotor corresponding to generator $u\in\R^3$.
+
+\textbf{Temperature and scale parameters.}
+The diffusion temperature $\tau > 0$ (or per-head $\tau_h$) controls the
+bandwidth of the heat kernel: smaller $\tau$ yields sharper attention
+concentrated near geodesically close keys. We write $\tau_{\min} > 0$ for a
+lower bound on temperature when uniformity is required. The small-angle
+parameter $\varepsilon > 0$ bounds rotor generator norms,
+$\|u\|, \|v\| \le \varepsilon$, and the threshold $\varepsilon_0 > 0$ is chosen
+so that $\varepsilon \le \varepsilon_0$ lies strictly below the injectivity
+radius (typically $\varepsilon_0 \ll \pi$).
+
+\textbf{Lie algebra and bracket.}
+The Lie algebra $\mathfrak{spin}(3) \cong \R^3$ consists of bivector generators
+under the commutator bracket. For $u,v\in\R^3$, the Lie bracket is the cross
+product $[u,v] = u \times v$, satisfying $\|[u,v]\| \le \|u\|\|v\|$.
+The \emph{Baker--Campbell--Hausdorff (BCH) formula} expresses the product of
+exponentials as a single exponential:
+$\exp(u)\exp(v) = \exp(u + v + \tfrac{1}{2}[u,v] + \cdots)$,
+with higher-order terms involving nested brackets. Under the bi-invariant
+metric, $\mathrm{ad}_u$ is skew-adjoint, so $\langle u, [u,w] \rangle = 0$.
+
+\textbf{Sparse attention notation.}
+For query $i$, let $S_i \subseteq \{1,\ldots,T\}$ be the candidate set of
+attended keys. Define the retained probability mass $p_i = \sum_{j\in S_i} P_{ij}$
+and the dropped mass $\delta_i = 1 - p_i$. The truncated attention weights are
+$\tilde{P}_{ij} = P_{ij}/p_i$ for $j \in S_i$ (assuming $p_i > 0$), and the
+sparse output is $\tilde{y}_i = \sum_{j\in S_i} \tilde{P}_{ij} v_j$.
+We write $V_{\max} = \max_j \|v_j\|$ for the maximum value norm.
+
+\textbf{Sequence and layer indices.}
+The sequence length (number of tokens/keys) is denoted $T$. In a depth-$L$
+stack, layers are indexed $\ell = 1,\ldots,L$. The Lipschitz constant of
+layer $\ell$ with respect to the $\|\cdot\|_{\infty,2}$ norm (max-row $\ell_2$)
+is denoted $L_\ell$; these constants are assumed uniformly bounded.
+The softmax function $\sigma:\R^T\to\R^T$ is defined component-wise by
+$\sigma(\ell)_i = \exp(\ell_i)/\sum_k \exp(\ell_k)$.
+
+\textbf{Group actions and equivariance.}
+For $g \in \Spin(3)$, left multiplication acts on rotors by $q \mapsto gq$.
+An orthogonal representation $L(g): \R^d \to \R^d$ satisfies
+$L(g)^\top L(g) = I$ and $L(g_1 g_2) = L(g_1) L(g_2)$.
+The tangent-space projector at $q \in S^3$ is $P_q = I - qq^\top$, projecting
+$\R^4$ onto $T_q S^3 = \{v \in \R^4 : \langle q,v \rangle = 0\}$.
+The rotor projection $P_{\mathrm{rot}}$ extracts the scalar+bivector components
+of an 8-dimensional multivector and normalizes to unit norm.
+
+\textbf{Absorbed constants.}
+Several proofs involve constants that depend only on the bi-invariant metric
+and the Lie algebra structure constants. Specifically:
+$C_{\mathrm{geo}}$ bounds the geodesic expansion error (Lemma~S2);
+$C_{\mathrm{head}}$ bounds head-level attention discrepancy (Theorem~S4);
+$C_{\mathrm{stack}} = C_{\mathrm{head}} \prod_\ell L_\ell$ bounds stack-level
+discrepancy; and $C_1, C_2$ bound iterated BCH remainders (Lemma~S12).
+These are finite, computable constants under the stated assumptions.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\linewidth]{figure_2_bridge_theorem.pdf}
+\caption{\textbf{Figure S1: The Bridge Theorem schematic.}
+(a) GSM heat kernel vs.\ standard softmax kernel as functions of geodesic angle;
+kernels match in the small-angle regime (shaded).
+(b) Error bound schematic: head-level error scales as $O(\varepsilon^2)$ (Theorem~S4),
+stack-level error as $O(L\varepsilon^2)$ (Corollary~S14).}
+\label{fig:bridge-theorem-si}
+\end{figure}
 
 \begin{center}
 \fbox{\parbox{0.92\linewidth}{
@@ -82,17 +158,6 @@ Inputs: rotor queries $\mu_i$, rotor keys $r_j$, values $v_j$, temperature $\tau
 6) If values live in rotor fibers, renormalize to the manifold after mixing.
 }}
 \end{center}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.98\linewidth]{figure_2_bridge_theorem.pdf}
-\caption{\textbf{Figure S1: The Bridge Theorem schematic.}
-(a) GSM heat kernel vs.\ standard softmax kernel as functions of geodesic angle;
-kernels match in the small-angle regime (shaded).
-(b) Error bound schematic: head-level error scales as $O(\varepsilon^2)$ (Theorem~S4),
-stack-level error as $O(L\varepsilon^2)$ (Corollary~S14).}
-\label{fig:bridge-theorem-si}
-\end{figure}
 
 \hypertarget{S1}{}\begin{lemma}[Sign invariance of the distance]\label{lem:sign-invariance}
 For any unit quaternions $q,k\in S^3$, the geodesic distance satisfies

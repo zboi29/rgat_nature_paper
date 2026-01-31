@@ -1,60 +1,63 @@
 # Project: RGAT Nature Paper (Hybrid Lean 4 + Python)
 
-## Overview
-This repository contains the code and verification artifacts for the "RGAT" (Relational Graph Attention Networks) Nature paper. It is a hybrid project combining **Lean 4** for formal mathematical verification and **Python** for symbolic validation and visualization.
+## Formalism & Theory
+This repository contains the code and verification artifacts for the **Riemannian Geometric-Algebra Transformer (RGAT)** Nature paper. The project rigorously establishes that standard Transformer attention is a flat-geometry limit of a curved diffusion operator on the rotor manifold $\Spin(3)$.
 
-The core research focus is on the geometric interpretation of transformers, specifically linking **Spin(3)** geometry (rotors, quaternions), geodesic distances, and heat-kernel attention to Euclidean Gaussian kernels (the "Bridge Theorem").
+### Core Thesis
+As detailed in **@[docs/tex/rgat_nature.tex]**, the central discovery is that the attention mechanism arises from Heat Kernel diffusion on the Lie group $\Spin(3)$:
+$$ K(\mu_i, r_j) = \exp\left(-\frac{d_{\mathrm{geo}}(\mu_i, r_j)^2}{2\tau}\right) $$
+where $d_{\mathrm{geo}}$ is the intrinsic geodesic distance on the manifold.
+
+### Key Theorems (Formalized)
+The following theorems from **@[docs/tex/si_rgat_nature.tex]** are the mathematical backbone of this project and are verified in Lean 4:
+
+*   **Theorem S4 (The Bridge Theorem)**: Proves that in the small-angle limit ($\varepsilon \to 0$), the geometric attention weights converge to the Euclidean Dot-Product Self-Attention of standard Transformers.
+    *   *Lean formalism*: `RgatNaturePaper.BridgeTheorem`
+*   **Lemma S1 (Sign Invariance)**: Establishes that the geodesic distance is well-defined on the double cover $\Spin(3) \to \SO(3)$.
+*   **Theorem S13 (Depth Accumulation)**: Shows that even with near-Euclidean layers, depth accumulates curvature via Baker-Campbell-Hausdorff commutators, preventing deep Transformers from being reducible to linear algebra.
 
 ## Architecture & Directory Structure
 
 ### 1. Formal Verification (Lean 4)
-*   **Root:** `/`
-*   **Main Library:** `RgatNaturePaper/`
-*   **Build System:** `lake` (Lean 4)
-*   **Status:** Early stage (scaffolding).
+*   **Root:** `RgatNaturePaper/`
+*   **Goal:** Machine-checkable proofs of Theorems S4, S13, and related lemmas.
 *   **Key Files:**
-    *   `lakefile.toml`: Project configuration and dependencies (depends on `mathlib`).
-    *   `RgatNaturePaper.lean`: Main library entry point.
-    *   `RgatNaturePaper/Basic.lean`: Basic definitions.
+    *   `RgatNaturePaper/Basic.lean`: Definitions of $\Spin(3)$ rotors and geodesic distance (matches **SI Definitions**).
+    *   `RgatNaturePaper/BridgeTheorem.lean`: The main covariance proof.
 
 ### 2. Validation & Visualization (Python)
 *   **Root:** `validation/`
-*   **Purpose:** Symbolic checks of lemmas and generation of publication figures.
-*   **Dependencies:** `sympy`, `numpy`, `matplotlib`, `torch`.
-*   **Subdirectories:**
-    *   `symbolic/`: Scripts checking mathematical properties (e.g., `validation_s1_sign_invariance.py` verifies Lemma S1).
-    *   `plotting/`: Scripts generating figures (e.g., `plot_figure_1_conceptual_bridge.py`).
+*   **Goal:** Symbolic validation of algebraic steps and generation of paper figures.
+*   **Key Directories:**
+    *   `validation/symbolic/`: SymPy scripts checking specific lemmas (e.g., `validation_s1_sign_invariance.py` checks **Lemma S1**).
+    *   `validation/plotting/`: Scripts to reproduce **Figure 1** (Conceptual Bridge) and **Figure 2** (Empirical Validation).
 
-## Key Mathematical Concepts
-*   **Spin(3) / S³:** The group of unit quaternions (rotors) representing 3D rotations.
-*   **Geodesic Distance ($d_{geo}$):** Distance between rotations on the manifold.
-*   **Heat Kernel:** Used for attention weights ($e^{-d_{geo}^2/2\tau}$).
-*   **Bridge Theorem:** Establishes the connection between the curved geometric operator and the flat Euclidean limit (Transformer).
+## Environment & Management
 
-## Usage
+### Python Environment
+We use a standard virtual environment (`.venv`) to manage Python dependencies.
+1.  **Creation**: `python3 -m venv .venv`
+2.  **Activation**: `source .venv/bin/activate`
+3.  **Dependencies**: Install via `pip install -r requirements.txt`
 
-### Building Lean Code
-To build the Lean project:
-```bash
-lake build
-```
+Always ensure the virtual environment is active before running any scripts in `validation/` or `scripts/`.
 
-### Running Validation Scripts
-The Python scripts are standalone but may require a local module `gat_aimo3` (referenced in imports but possibly external or generated).
+### Lean 4 Management
+The formal verification component is managed by `lake` (Lean Make).
+1.  **Build**: Run `lake build` from the repository root to compile the proofs.
+2.  **Edit**: Open the `RgatNaturePaper/` directory in VS Code with the Lean 4 extension enabled.
 
-**Example: Symbolic Validation**
-```bash
-python3 validation/symbolic/validation_s1_sign_invariance.py
-```
+## Development Guidelines
 
-**Example: Plotting Figure 1**
-```bash
-python3 validation/plotting/plot_figure_1_conceptual_bridge.py
-```
+### Terminology
+*   **ALWAYS** refer to the architecture as **Riemannian Geometric-Algebra Transformer (RGAT)**.
+*   **NEVER** use "Relational Graph Attention Networks" (deprecated terminology).
 
-## Development Notes
-*   **Source of Truth:** All mathematical definitions, theorems, and explanations must be referenced and cited from the TeX papers located in `docs/tex/` (specifically `rgat_nature.tex` and `si_rgat_nature.tex`). These files supersede any inline comments or code implementations.
-*   **Conventions:**
-    *   **Lean:** Follows standard Mathlib conventions.
-    *   **Python:** Uses `argparse` for CLI, type hints, and structured validation steps.
-*   **CI/CD:** GitHub Actions workflows in `.github/workflows/` handle CI (`lean_action_ci.yml`).
+### Source of Truth
+*   The LaTeX files in **@[docs/tex/]** are the ground truth for all formulas and definitions.
+*   When implementing or verifying code, cite the specific Equation or Theorem number from `docs/tex/si_rgat_nature.tex`.
+
+### Verification Workflow
+1.  **Check the Math**: Refer to definitions in `docs/tex/si_rgat_nature.tex`.
+2.  **Run Symbolic Check**: execute the corresponding script in `validation/symbolic/`.
+3.  **Run Formal Proof**: Build the Lean project with `lake build`.
