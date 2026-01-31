@@ -71,6 +71,7 @@ def LemmaS12Statement : Prop :=
 
 /-
 Theorem S13: Depth accumulates curvature. The composed motion includes commutator curvature of size O(L^2 epsilon^2).
+TODO: provide Lean proof for Theorem S13.
 -/
 def TheoremS13Statement : Prop :=
   ∀ (L : ℕ) [NeZero L] (u : Fin L → Quaternion ℝ) (ε : ℝ),
@@ -89,6 +90,7 @@ Checking for LipschitzWith definition.
 
 /-
 Corollary S14: Standard attention approximates rotor flow. A depth-L standard Transformer stack approximates the corresponding rotor flow (RGAT) with error O(L epsilon^2).
+TODO: provide Lean proof for Corollary S14.
 -/
 def CorollaryS14Statement : Prop :=
   ∀ (L : ℕ) [NeZero L] (d : ℕ) (F_gsm F_std : Fin L → (Fin d → ℝ) → (Fin d → ℝ)) (Lip : Fin L → NNReal) (ε : ℝ),
@@ -98,6 +100,7 @@ def CorollaryS14Statement : Prop :=
 
 /-
 Lemma S3: Softmax stability. For any logits l, l', the softmax satisfies ||softmax(l) - softmax(l')||_infinity <= 1/2 ||l - l'||_infinity.
+TODO: provide Lean proof for Lemma S3.
 -/
 def LemmaS3Statement : Prop :=
   ∀ (n : ℕ) [NeZero n] (l l' : Fin n → ℝ),
@@ -112,6 +115,7 @@ def CorollaryS11Statement : Prop :=
 
 /-
 Theorem S4 (Stack-level): For a depth-L stack of Lipschitz layers, the error scales as O(L * epsilon^2).
+TODO: provide Lean proof for stack-level Bridge Theorem.
 -/
 def BridgeTheoremStackStatement : Prop :=
   ∀ (L : ℕ) [NeZero L] (d : ℕ) (F_rgat F_trans : Fin L → (Fin d → ℝ) → (Fin d → ℝ)) (Lip : Fin L → NNReal) (ε : ℝ),

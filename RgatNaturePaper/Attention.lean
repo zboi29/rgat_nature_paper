@@ -106,6 +106,7 @@ theorem test_true : True := True.intro
 
 /-
 Statement of Theorem S4 (Bridge Theorem, head-level bound).
+TODO: provide Lean proof for Theorem S4.
 -/
 def BridgeTheoremHeadStatement : Prop :=
   ∃ C_head > 0, ∀ ε > 0, ε < 1 →
