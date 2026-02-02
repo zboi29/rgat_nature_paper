@@ -100,11 +100,69 @@ def CorollaryS14Statement : Prop :=
 
 /-
 Lemma S3: Softmax stability. For any logits l, l', the softmax satisfies ||softmax(l) - softmax(l')||_infinity <= 1/2 ||l - l'||_infinity.
-TODO: provide Lean proof for Lemma S3.
 -/
 def LemmaS3Statement : Prop :=
   ∀ (n : ℕ) [NeZero n] (l l' : Fin n → ℝ),
   norm_infty (softmax l - softmax l') ≤ 1 / 2 * norm_infty (l - l')
+
+theorem LemmaS3 : LemmaS3Statement := by
+  have := @softmax_jacobian_bound
+  intro n hn x y
+  have h_mean_value :
+      ∀ i : Fin n, ∃ c ∈ Set.Icc (0 : ℝ) 1,
+        deriv (fun t => softmax (line_segment x y t) i) c =
+          (softmax y i - softmax x i) / (1 - 0) := by
+    intro i
+    have h :=
+      exists_deriv_eq_slope (f := fun t => softmax (line_segment x y t) i) zero_lt_one
+    have hcont :
+        ContinuousOn (fun t => softmax (line_segment x y t) i) (Set.Icc (0 : ℝ) 1) := by
+      exact Continuous.continuousOn <|
+        (Differentiable.continuous (differentiable_softmax_line_segment x y i))
+    have hdiff :
+        DifferentiableOn ℝ (fun t => softmax (line_segment x y t) i) (Set.Ioo (0 : ℝ) 1) := by
+      exact (differentiable_softmax_line_segment x y i).differentiableOn
+    obtain ⟨c, hc₁, hc₂⟩ := h hcont hdiff
+    exact ⟨c, Set.Ioo_subset_Icc_self hc₁, by simpa [line_segment] using hc₂⟩
+  have h_deriv_bound :
+      ∀ i : Fin n, ∀ c ∈ Set.Icc (0 : ℝ) 1,
+        |deriv (fun t => softmax (line_segment x y t) i) c| ≤
+          1 / 2 * norm_infty (y - x) := by
+    intros i c hc
+    have h_deriv_bound :
+        |deriv (fun t => softmax (line_segment x y t) i) c| ≤
+          ∑ j : Fin n,
+            |(y - x) j| *
+              |softmax (line_segment x y c) i *
+                ((if i = j then 1 else 0) - softmax (line_segment x y c) j)| := by
+      have h_deriv_bound :
+          deriv (fun t => softmax (line_segment x y t) i) c =
+            ∑ j : Fin n,
+              (y - x) j * (softmax (line_segment x y c) i *
+                ((if i = j then 1 else 0) - softmax (line_segment x y c) j)) := by
+        convert deriv_softmax_line_segment x y i c using 1
+      exact h_deriv_bound ▸
+        le_trans (Finset.abs_sum_le_sum_abs _ _)
+          (Finset.sum_le_sum fun _ _ => by rw [abs_mul])
+    refine le_trans h_deriv_bound ?_
+    refine' le_trans
+        (Finset.sum_le_sum fun j _ =>
+          mul_le_mul_of_nonneg_right
+            (by simpa using (norm_infty_ge_abs (y - x) j)) (abs_nonneg _)) _
+    rw [← Finset.mul_sum _ _ _]
+    nlinarith [this (line_segment x y c) i, norm_infty_nonneg (y - x)]
+  have h_final_bound :
+      ∀ i : Fin n, |softmax y i - softmax x i| ≤ 1 / 2 * norm_infty (y - x) := by
+    intro i
+    obtain ⟨c, hc₁, hc₂⟩ := h_mean_value i
+    specialize h_deriv_bound i c hc₁
+    norm_num [hc₂] at h_deriv_bound ⊢
+    linarith
+  convert norm_infty_le _ _ using 1
+  · convert h_final_bound using 2
+    norm_num [abs_sub_comm]
+    unfold norm_infty; norm_num [abs_sub_comm]
+  · exact mul_nonneg (by norm_num) (norm_infty_nonneg _)
 
 /-
 Corollary S11: Structural learning as geodesic alignment. The negative gradient flow aligns with the geodesic from q to r.
