@@ -10,7 +10,7 @@ The codebase adopts a hybrid approach:
 *   **Formal Verification (Lean 4)**: Mathematical proofs of the core theorems, ensuring logical soundness.
 *   **Symbolic Validation (Python)**: Symbolic checks and numeric experiments to validate the theoretical results and generate publication figures.
 
-Formal verification, via Lean, now covers SI statements **S1–S14**, including the head- and stack-level clauses of the Bridge Theorem.
+Formal verification, via Lean, now covers SI statements **S1–S14**, including the head‑level and stack‑level clauses of the Bridge Theorem.
 
 ## SI ↔ Lean Guide (For Editors and Reviewers)
 
@@ -34,7 +34,7 @@ These documents are written to make the proof layout auditable without prior Lea
 
 ### Prerequisites
 *   **Python**: 3.10+
-*   **Lean 4**: (Optional, for formal verification) Navigate to https://lean-lang.org/install/ for installation instructions.
+*   **Lean 4** (optional, for formal verification): See https://lean-lang.org/install/ for installation instructions.
 
 ### Lean Environment Details
 
@@ -51,8 +51,8 @@ These documents are written to make the proof layout auditable without prior Lea
 
 2.  Install Python dependencies:
     ```bash
-    python3 -m venv venv
-    source venv/bin/activate
+    python3 -m venv .venv
+    source .venv/bin/activate
     pip install -r requirements.txt
     ```
 
