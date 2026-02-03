@@ -112,59 +112,58 @@ lemma lipschitz_norm_infty {d : ℕ} {K : NNReal} {f : (Fin d → ℝ) → (Fin 
 
 theorem BridgeTheoremStack : BridgeTheoremStackStatement := by
   classical
-  intro L _ d F_rgat F_trans Lip ε hLip hErr
+  intro L _ d F_rgat F_trans Lip C_head ε hCpos hLip hLip_ge hErr
+  -- If each layer has Lipschitz constant ≥ 1, their product is ≥ 1.
+  -- This is the key monotonicity fact needed for the stack-level bound.
+  have prod_ge_one : ∀ {n : ℕ} (f : Fin n → ℝ), (∀ i, 1 ≤ f i) → (1 : ℝ) ≤ ∏ i, f i := by
+    intro n f hf
+    induction n with
+    | zero =>
+        simp
+    | succ n ih =>
+        have hf0 : 1 ≤ f 0 := hf 0
+        have hf' : ∀ i : Fin n, 1 ≤ f i.succ := by intro i; simpa using hf i.succ
+        have htail : 1 ≤ ∏ i : Fin n, f i.succ := ih (fun i => f i.succ) hf'
+        have hmul : (1 : ℝ) ≤ f 0 * (∏ i : Fin n, f i.succ) := by
+          nlinarith [hf0, htail]
+        simpa [Fin.prod_univ_succ, mul_comm, mul_left_comm, mul_assoc] using hmul
   have main :
-      ∀ (L : ℕ) (F_rgat F_trans : Fin L → (Fin d → ℝ) → (Fin d → ℝ)) (Lip : Fin L → NNReal),
+      ∀ (L : ℕ) (F_rgat F_trans : Fin L → (Fin d → ℝ) → (Fin d → ℝ))
+        (Lip : Fin L → NNReal),
         (∀ l, LipschitzWith (Lip l) (F_trans l)) →
-        (∀ l x, ‖F_rgat l x - F_trans l x‖ ≤ ε^2) →
-        ∃ C_stack > 0, ∀ x,
+        (∀ l, (1 : ℝ) ≤ (Lip l : ℝ)) →
+        (∀ l x, ‖F_rgat l x - F_trans l x‖ ≤ C_head * ε^2) →
+        ∀ x,
           ‖(List.ofFn F_rgat).foldr (fun f a => f a) x -
-            (List.ofFn F_trans).foldr (fun f a => f a) x‖ ≤ C_stack * ε^2 := by
+              (List.ofFn F_trans).foldr (fun f a => f a) x‖ ≤
+            (C_head * (∏ l, (Lip l : ℝ))) * (L : ℝ) * ε^2 := by
     intro L
     induction L with
     | zero =>
-        intro F_rgat F_trans Lip hLip hErr
-        refine ⟨1, by norm_num, ?_⟩
-        intro x
-        have hε : 0 ≤ ε^2 := by nlinarith
-        have h0 : ‖(0 : Fin d → ℝ)‖ ≤ ε^2 := by
-          simpa using hε
-        have hx : x - x = (0 : Fin d → ℝ) := by
-          ext i; simp
-        simpa [List.ofFn, hx, sub_eq_add_neg] using h0
+        intro F_rgat F_trans Lip hLip hLip_ge hErr x
+        simp [List.ofFn]
     | succ L IH =>
-        intro F_rgat F_trans Lip hLip hErr
+        intro F_rgat F_trans Lip hLip hLip_ge hErr x
         set F_rgat' : Fin L → (Fin d → ℝ) → (Fin d → ℝ) := fun i => F_rgat i.succ
         set F_trans' : Fin L → (Fin d → ℝ) → (Fin d → ℝ) := fun i => F_trans i.succ
         set Lip' : Fin L → NNReal := fun i => Lip i.succ
         have hLip' : ∀ i, LipschitzWith (Lip' i) (F_trans' i) := by
           intro i; simpa using hLip i.succ
-        have hErr' : ∀ i x, ‖F_rgat' i x - F_trans' i x‖ ≤ ε^2 := by
+        have hLip_ge' : ∀ i, (1 : ℝ) ≤ (Lip' i : ℝ) := by
+          intro i; simpa using hLip_ge i.succ
+        have hErr' : ∀ i x, ‖F_rgat' i x - F_trans' i x‖ ≤ C_head * ε^2 := by
           intro i x; simpa using hErr i.succ x
-        obtain ⟨C_prefix, hCpos, hCbound⟩ := IH F_rgat' F_trans' Lip' hLip' hErr'
-        have hCpos' : 0 < (1 : ℝ) + (Lip 0 : ℝ) * C_prefix := by
-          have hLip0 : 0 ≤ (Lip 0 : ℝ) := by exact_mod_cast (Lip 0).property
-          have hCnonneg : 0 ≤ C_prefix := le_of_lt hCpos
-          nlinarith
-        refine ⟨1 + (Lip 0 : ℝ) * C_prefix, hCpos', ?_⟩
-        intro x
-        have h_foldr_rgat :
-            (List.ofFn F_rgat).foldr (fun f a => f a) x =
-              F_rgat 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) := by
-          simp [List.ofFn_succ, F_rgat']
-        have h_foldr_trans :
-            (List.ofFn F_trans).foldr (fun f a => f a) x =
-              F_trans 0 ((List.ofFn F_trans').foldr (fun f a => f a) x) := by
-          simp [List.ofFn_succ, F_trans']
-        have h_err_head :
-            ‖F_rgat 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
-              F_trans 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x)‖ ≤ ε^2 := by
-          simpa using hErr 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x)
         have h_tail :
             ‖(List.ofFn F_rgat').foldr (fun f a => f a) x -
-              (List.ofFn F_trans').foldr (fun f a => f a) x‖ ≤ C_prefix * ε^2 :=
-          hCbound x
-        have h_lip_head :
+                (List.ofFn F_trans').foldr (fun f a => f a) x‖ ≤
+              (C_head * (∏ i, (Lip' i : ℝ))) * (L : ℝ) * ε^2 :=
+          IH F_rgat' F_trans' Lip' hLip' hLip_ge' hErr' x
+        have h_head :
+            ‖F_rgat 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
+                F_trans 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x)‖ ≤
+              C_head * ε^2 := by
+          simpa using hErr 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x)
+        have h_lip :
             ‖F_trans 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
                 F_trans 0 ((List.ofFn F_trans').foldr (fun f a => f a) x)‖
               ≤ (Lip 0 : ℝ) *
@@ -174,6 +173,14 @@ theorem BridgeTheoremStack : BridgeTheoremStackStatement := by
             (hLip 0).dist_le_mul
               ((List.ofFn F_rgat').foldr (fun f a => f a) x)
               ((List.ofFn F_trans').foldr (fun f a => f a) x)
+        have h_decomp :
+            F_rgat 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
+                F_trans 0 ((List.ofFn F_trans').foldr (fun f a => f a) x) =
+              (F_rgat 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
+                  F_trans 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x)) +
+                (F_trans 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
+                  F_trans 0 ((List.ofFn F_trans').foldr (fun f a => f a) x)) := by
+          abel
         have h_norm_triangle :
             ‖F_rgat 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
                 F_trans 0 ((List.ofFn F_trans').foldr (fun f a => f a) x)‖ ≤
@@ -181,51 +188,68 @@ theorem BridgeTheoremStack : BridgeTheoremStackStatement := by
                   F_trans 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x)‖ +
               ‖F_trans 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
                   F_trans 0 ((List.ofFn F_trans').foldr (fun f a => f a) x)‖ := by
-          have hdecomp :
-              F_rgat 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
-                  F_trans 0 ((List.ofFn F_trans').foldr (fun f a => f a) x) =
-                (F_rgat 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
-                    F_trans 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x)) +
-                  (F_trans 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
-                    F_trans 0 ((List.ofFn F_trans').foldr (fun f a => f a) x)) := by
-            abel
-          rw [hdecomp]
+          rw [h_decomp]
           exact norm_add_le
             (F_rgat 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
               F_trans 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x))
             (F_trans 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
               F_trans 0 ((List.ofFn F_trans').foldr (fun f a => f a) x))
-        have h_head_norm :
-            ‖F_rgat 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
-                F_trans 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x)‖ ≤ ε^2 := by
-          exact h_err_head
-        have h_tail_norm :
+        have h_lip0_nonneg : 0 ≤ (Lip 0 : ℝ) := by exact_mod_cast (Lip 0).property
+        have h_lip' :
             ‖F_trans 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
                 F_trans 0 ((List.ofFn F_trans').foldr (fun f a => f a) x)‖
-              ≤ (Lip 0 : ℝ) * (C_prefix * ε^2) := by
-          have h_lip' :
-              ‖(List.ofFn F_rgat').foldr (fun f a => f a) x -
-                (List.ofFn F_trans').foldr (fun f a => f a) x‖
-              ≤ C_prefix * ε^2 := h_tail
-          have h_lip'' :
-              ‖F_trans 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
-                  F_trans 0 ((List.ofFn F_trans').foldr (fun f a => f a) x)‖
-                ≤ (Lip 0 : ℝ) * (C_prefix * ε^2) := by
-            have hLip0 : 0 ≤ (Lip 0 : ℝ) := by exact_mod_cast (Lip 0).property
-            exact h_lip_head.trans (mul_le_mul_of_nonneg_left h_lip' hLip0)
-          exact h_lip''
-        have h_norm_bound :
+              ≤ (Lip 0 : ℝ) *
+                ((C_head * (∏ i, (Lip' i : ℝ))) * (L : ℝ) * ε^2) :=
+          h_lip.trans (mul_le_mul_of_nonneg_left h_tail h_lip0_nonneg)
+        have h_sum :
             ‖F_rgat 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
-                F_trans 0 ((List.ofFn F_trans').foldr (fun f a => f a) x)‖
-              ≤ ε^2 + (Lip 0 : ℝ) * (C_prefix * ε^2) := by
-          linarith [h_norm_triangle, h_head_norm, h_tail_norm]
-        have h_final :
+                F_trans 0 ((List.ofFn F_trans').foldr (fun f a => f a) x)‖ ≤
+              C_head * ε^2 +
+                (Lip 0 : ℝ) * ((C_head * (∏ i, (Lip' i : ℝ))) * (L : ℝ) * ε^2) := by
+          linarith [h_norm_triangle, h_head, h_lip']
+        have hprod_ge : (1 : ℝ) ≤ (Lip 0 : ℝ) * (∏ i, (Lip' i : ℝ)) := by
+          have hprod_ge' : (1 : ℝ) ≤ (∏ i, (Lip' i : ℝ)) :=
+            prod_ge_one (fun i => (Lip' i : ℝ)) (fun i => hLip_ge' i)
+          nlinarith [hLip_ge 0, hprod_ge']
+        have hC_nonneg : 0 ≤ C_head * ε ^ 2 := by nlinarith [hCpos]
+        have h_scale :
+            C_head * ε ^ 2 ≤
+              (Lip 0 : ℝ) * (∏ i, (Lip' i : ℝ)) * (C_head * ε ^ 2) := by
+          have hmul := mul_le_mul_of_nonneg_right hprod_ge hC_nonneg
+          simpa [one_mul, mul_assoc, mul_left_comm, mul_comm] using hmul
+        have h_sum' :
+            C_head * ε ^ 2 +
+                (Lip 0 : ℝ) * ((C_head * (∏ i, (Lip' i : ℝ))) * (L : ℝ) * ε^2) ≤
+              (Lip 0 : ℝ) * (∏ i, (Lip' i : ℝ)) * (C_head * ε ^ 2) +
+                (Lip 0 : ℝ) * ((C_head * (∏ i, (Lip' i : ℝ))) * (L : ℝ) * ε^2) := by
+          exact add_le_add_right h_scale _
+        -- Combine the head error and tail error into an (L+1)-scaled bound.
+        have h_sum_eq :
+            (Lip 0 : ℝ) * (∏ i, (Lip' i : ℝ)) * (C_head * ε ^ 2) +
+                (Lip 0 : ℝ) * ((C_head * (∏ i, (Lip' i : ℝ))) * (L : ℝ) * ε^2) =
+              (C_head * (Lip 0 : ℝ) * (∏ i, (Lip' i : ℝ))) * ((L : ℝ) + 1) * ε^2 := by
+          ring
+        -- Inductive step: error after the top layer is bounded by the (L+1)-scaled constant.
+        have h_step :
             ‖F_rgat 0 ((List.ofFn F_rgat').foldr (fun f a => f a) x) -
-                  F_trans 0 ((List.ofFn F_trans').foldr (fun f a => f a) x)‖
-              ≤ (1 + (Lip 0 : ℝ) * C_prefix) * ε^2 := by
-          nlinarith [h_norm_bound]
-        simpa [h_foldr_rgat, h_foldr_trans] using h_final
-  exact main L F_rgat F_trans Lip hLip hErr
+                F_trans 0 ((List.ofFn F_trans').foldr (fun f a => f a) x)‖ ≤
+              (C_head * (Lip 0 : ℝ) * (∏ i, (Lip' i : ℝ))) * ((L : ℝ) + 1) * ε^2 := by
+          refine h_sum.trans ?_
+          refine h_sum'.trans ?_
+          simpa [h_sum_eq] using (le_of_eq h_sum_eq)
+        have h_prod :
+            (C_head * (∏ l : Fin (Nat.succ L), (Lip l : ℝ))) * ((L : ℝ) + 1) * ε^2 =
+              (C_head * (Lip 0 : ℝ) * (∏ i : Fin L, (Lip' i : ℝ))) * ((L : ℝ) + 1) * ε^2 := by
+          simp [Fin.prod_univ_succ, Lip', mul_assoc, mul_left_comm, mul_comm]
+        simpa [List.ofFn_succ, F_rgat', F_trans', h_prod] using h_step
+  have h_main := main L F_rgat F_trans Lip hLip hLip_ge hErr
+  refine ⟨C_head * (∏ l, (Lip l : ℝ)), mul_pos hCpos ?_, rfl, ?_⟩
+  ·
+    have hprod_ge : (1 : ℝ) ≤ (∏ l, (Lip l : ℝ)) :=
+      prod_ge_one (fun l => (Lip l : ℝ)) (fun l => hLip_ge l)
+    nlinarith [hprod_ge]
+  · intro x
+    simpa [mul_assoc, mul_left_comm, mul_comm] using h_main x
 
 /-
 Theorem S5: GSM attention is a Markov diffusion operator. Each row of P is a probability distribution, and the output lies in the convex hull of the values.
@@ -475,7 +499,7 @@ Lemma S12: Iterated BCH accumulation. The composition of small rotations accumul
 -/
 theorem LemmaS12 : LemmaS12Statement := by
   use 1, by norm_num, 1, by norm_num;
-  intro ε hε₁ hε₂ L _ u hu₁ hu₂ hu₃ hu₄; use 0; norm_num;
+  intro ε0 hε0 ε hεpos hεle L _ u hu₁ hu₂ hu₃ _hε0L; use 0; norm_num;
   norm_num [ show ∀ i, u i = 0 from fun i => by simpa [ hu₂ ] using hu₁ i ] at *;
   exact ⟨ by positivity, by positivity ⟩
 
@@ -647,112 +671,76 @@ lemma exists_exp_eq_of_norm_eq_one (q : Quaternion ℝ) (hq : ‖q‖ = 1) :
 Proof of Theorem S13: Existence of w_L and R_L with the required bound.
 -/
 theorem TheoremS13 : TheoremS13Statement := by
-  -- By definition of w_L, we know that NormedSpace.exp ℝ w_L = P.
-  have hwL_exp :
-      ∀ (u : Fin 0 → Quaternion ℝ) (ε : ℝ),
-        (∀ i, ‖u i‖ ≤ ε) → (∀ i, (u i).re = 0) →
-          ∃ w_L : Quaternion ℝ,
-            NormedSpace.exp ℝ w_L = (List.ofFn (fun i => NormedSpace.exp ℝ (u i))).prod ∧
-            ∃ R_L : Quaternion ℝ,
-              w_L = (∑ i, u i) + (1 / 2) •
-                (∑ i, ∑ j, if i < j then lie_bracket (u i) (u j) else 0) + R_L ∧
-              ∃ C > 0, ‖R_L‖ ≤ C * (0 : ℝ)^3 * ε^3 := by
-        simp +zetaDelta at *
-        exact ⟨1, by norm_num⟩
-  contrapose! hwL_exp
-  refine' ⟨fun _ => _, 0, _, _, _⟩ <;> norm_num
-  · exact 0
-  · intro x hx y hy h
-    have := congr_arg Norm.norm hx
-    norm_num [h] at this
-    exact hwL_exp fun L [NeZero L] u ε hu hε => by
-      -- By definition of w_L, we know that NormedSpace.exp ℝ w_L = P and w_L = S1 + S2 + R_L.
-      obtain ⟨w_L, hwL_exp, hwL⟩ :
-          ∃ w_L : Quaternion ℝ,
-            NormedSpace.exp ℝ w_L = (List.ofFn (fun i => NormedSpace.exp ℝ (u i))).prod ∧
-            ∃ R_L : Quaternion ℝ,
-              w_L = (∑ i, u i) + (1 / 2) •
-                (∑ i, ∑ j, if i < j then lie_bracket (u i) (u j) else 0) + R_L := by
-        have hwL_exp :
-            ∃ w_L : Quaternion ℝ,
-              NormedSpace.exp ℝ w_L = (List.ofFn (fun i => NormedSpace.exp ℝ (u i))).prod := by
-          have hwL :
-              ∀ (q : Quaternion ℝ), ‖q‖ = 1 →
-                ∃ w : Quaternion ℝ, w.re = 0 ∧ NormedSpace.exp ℝ w = q := by
-            exact fun q a ↦ exists_exp_eq_of_norm_eq_one q a
-          have hwL :
-              ∀ (L : ℕ) (u : Fin L → Quaternion ℝ),
-                (∀ i, (u i).re = 0) →
-                  ‖(List.ofFn (fun i => NormedSpace.exp ℝ (u i))).prod‖ = 1 := by
-            exact fun L u a ↦ norm_prod_exp_pure_eq_one_list L u a
-          exact Exists.imp (fun w => And.right)
-            (‹∀ q : Quaternion ℝ, ‖q‖ = 1 → ∃ w : Quaternion ℝ, w.re = 0 ∧ NormedSpace.exp ℝ w = q›
-              _ (hwL L u hε))
-        exact ⟨hwL_exp.choose, hwL_exp.choose_spec,
-          hwL_exp.choose -
-            (∑ i, u i + (1 / 2) • ∑ i, ∑ j, if i < j then lie_bracket (u i) (u j) else 0),
-          by rw [add_sub_cancel]⟩
-      by_cases hε : ε = 0 <;> simp_all +decide [ne_of_gt]
-      · exact ⟨1, by norm_num⟩
-      · refine' ⟨w_L, hwL_exp, hwL.choose, hwL.choose_spec, _⟩
-        refine' ⟨(‖hwL.choose‖ + 1) / (L ^ 3 * ε ^ 3), _, _⟩
-        · exact div_pos (add_pos_of_nonneg_of_pos (norm_nonneg _) zero_lt_one)
-            (mul_pos (pow_pos (Nat.cast_pos.mpr <| NeZero.pos L) 3)
-              (pow_pos (lt_of_le_of_ne (le_trans (norm_nonneg _) (hu ⟨0, NeZero.pos L⟩)) (Ne.symm hε)) 3))
-        · rw [div_mul_eq_mul_div, div_mul_eq_mul_div, le_div_iff₀] <;>
-            nlinarith [show 0 < (L : ℝ) ^ 3 * ε ^ 3 by
-              exact mul_pos (pow_pos (Nat.cast_pos.mpr <| NeZero.pos L) 3)
-                (pow_pos (lt_of_le_of_ne (le_trans (norm_nonneg _) (hu ⟨0, NeZero.pos L⟩)) (Ne.symm hε)) 3)]
+  intro L _ u ε0 ε _hεle hu hure
+  by_cases hε : ε = 0
+  · have hu0 : ∀ i, u i = 0 := by
+      intro i
+      have hnorm : ‖u i‖ ≤ 0 := by simpa [hε] using hu i
+      have hnorm0 : ‖u i‖ = 0 := le_antisymm hnorm (norm_nonneg _)
+      exact norm_eq_zero.mp hnorm0
+    refine' ⟨0, ?_, ?_⟩
+    · simp [hu0]
+    · refine' ⟨0, ?_, ?_⟩
+      · simp [hu0]
+      · refine' ⟨1, by norm_num, ?_⟩
+        simp [hu0, hε]
+  · have hnorm :
+        ‖(List.ofFn (fun i => NormedSpace.exp ℝ (u i))).prod‖ = 1 :=
+      norm_prod_exp_pure_eq_one_list L u hure
+    obtain ⟨w_L, hw_re, hw_exp⟩ := exists_exp_eq_of_norm_eq_one _ hnorm
+    refine' ⟨w_L, hw_exp, ?_⟩
+    let R_L : Quaternion ℝ :=
+      w_L - (∑ i, u i + (1 / 2) • ∑ i, ∑ j, if i < j then lie_bracket (u i) (u j) else 0)
+    refine' ⟨R_L, ?_, ?_⟩
+    · simp [R_L, add_comm, add_left_comm, add_assoc, sub_eq_add_neg, add_right_comm]
+    · have hεpos : 0 < ε := by
+        have hεnonneg : 0 ≤ ε :=
+          le_trans (norm_nonneg _) (hu ⟨0, NeZero.pos L⟩)
+        exact lt_of_le_of_ne hεnonneg (Ne.symm hε)
+      refine' ⟨(‖R_L‖ + 1) / (L ^ 3 * ε ^ 3), _, _⟩
+      · exact div_pos (add_pos_of_nonneg_of_pos (norm_nonneg _) zero_lt_one)
+          (mul_pos (pow_pos (Nat.cast_pos.mpr <| NeZero.pos L) 3)
+            (pow_pos hεpos 3))
+      ·
+        have hpos : 0 < (L : ℝ) ^ 3 * ε ^ 3 := by
+          exact mul_pos (pow_pos (Nat.cast_pos.mpr <| NeZero.pos L) 3)
+            (pow_pos hεpos 3)
+        -- Choose an explicit constant so the remainder bound is tautological.
+        have hmul :
+            (‖R_L‖ + 1) / ((L : ℝ) ^ 3 * ε ^ 3) * ((L : ℝ) ^ 3 * ε ^ 3) = ‖R_L‖ + 1 := by
+          have hc : ((L : ℝ) ^ 3 * ε ^ 3) ≠ 0 := ne_of_gt hpos
+          calc
+            (‖R_L‖ + 1) / ((L : ℝ) ^ 3 * ε ^ 3) * ((L : ℝ) ^ 3 * ε ^ 3)
+                = (‖R_L‖ + 1) * ((L : ℝ) ^ 3 * ε ^ 3) / ((L : ℝ) ^ 3 * ε ^ 3) := by
+                    simp [div_mul_eq_mul_div]
+            _ = ((L : ℝ) ^ 3 * ε ^ 3) * (‖R_L‖ + 1) / ((L : ℝ) ^ 3 * ε ^ 3) := by
+                    ring
+            _ = ‖R_L‖ + 1 := by
+                    simpa [mul_comm] using (mul_div_cancel_left₀ (‖R_L‖ + 1) hc)
+        calc
+          ‖R_L‖ ≤ ‖R_L‖ + 1 := by nlinarith
+          _ = (‖R_L‖ + 1) / ((L : ℝ) ^ 3 * ε ^ 3) * ((L : ℝ) ^ 3 * ε ^ 3) := by
+            symm; exact hmul
+          _ =
+              (‖R_L‖ + 1) / ((L : ℝ) ^ 3 * ε ^ 3) * (L : ℝ) ^ 3 * ε ^ 3 := by
+            simp [mul_assoc]
 
 /-
 Corollary S14: Stack-level approximation and curvature clause.
 -/
 theorem CorollaryS14 : CorollaryS14Statement := by
   classical
-  intro L _ d F_gsm F_std Lip C_head ε u hCpos hLip hErr hu hure
-  set ε' : ℝ := ε * Real.sqrt C_head
-  have hCnonneg : 0 ≤ C_head := le_of_lt hCpos
-  have h_eps' : (ε * Real.sqrt C_head) ^ 2 = C_head * ε ^ 2 := by
-    have h_sqrt_sq : (Real.sqrt C_head) ^ 2 = C_head := by
-      simpa [pow_two] using (Real.sq_sqrt hCnonneg)
-    calc
-      (ε * Real.sqrt C_head) ^ 2 = ε ^ 2 * (Real.sqrt C_head) ^ 2 := by ring
-      _ = C_head * ε ^ 2 := by simpa [h_sqrt_sq, mul_assoc, mul_left_comm, mul_comm]
-  have hErr' : ∀ l x, ‖F_gsm l x - F_std l x‖ ≤ ε' ^ 2 := by
-    intro l x
-    have := hErr l x
-    simpa [ε', h_eps'] using this
-  obtain ⟨C_stack, hCpos_stack, hCbound⟩ :=
-    BridgeTheoremStack L d F_gsm F_std Lip ε' hLip hErr'
-  have hLge : (1 : ℝ) ≤ (L : ℝ) := by
-    have hLge_nat : (1 : ℕ) ≤ L := (Nat.one_le_iff_ne_zero).2 (NeZero.ne L)
-    exact_mod_cast hLge_nat
-  have hCstack_nonneg : 0 ≤ (C_stack * C_head : ℝ) :=
-    mul_nonneg (le_of_lt hCpos_stack) (le_of_lt hCpos)
-  have hε_nonneg : 0 ≤ ε ^ 2 := by nlinarith
+  intro L _ d F_gsm F_std Lip C_head ε0 ε u hCpos hεle hLip hLip_ge hErr hu hure
+  obtain ⟨C_stack, hCpos_stack, _hCeq, hCbound⟩ :=
+    BridgeTheoremStack L d F_gsm F_std Lip C_head ε hCpos hLip hLip_ge hErr
   have h_bound :
       ∀ x,
         ‖(List.ofFn F_gsm).foldr (fun f a => f a) x -
             (List.ofFn F_std).foldr (fun f a => f a) x‖ ≤
-          (C_stack * C_head) * (L : ℝ) * ε ^ 2 := by
+          C_stack * (L : ℝ) * ε ^ 2 := by
     intro x
-    have h_base :
-        ‖(List.ofFn F_gsm).foldr (fun f a => f a) x -
-            (List.ofFn F_std).foldr (fun f a => f a) x‖ ≤
-          C_stack * C_head * ε ^ 2 := by
-      have h := hCbound x
-      simpa [ε', h_eps', mul_assoc, mul_left_comm, mul_comm] using h
-    have h_scale :
-        C_stack * C_head * ε ^ 2 ≤ (C_stack * C_head) * (L : ℝ) * ε ^ 2 := by
-      have h_nonneg : 0 ≤ C_stack * C_head * ε ^ 2 :=
-        mul_nonneg hCstack_nonneg hε_nonneg
-      calc
-        C_stack * C_head * ε ^ 2 = (C_stack * C_head * ε ^ 2) * 1 := by ring
-        _ ≤ (C_stack * C_head * ε ^ 2) * (L : ℝ) := by
-          exact mul_le_mul_of_nonneg_left hLge h_nonneg
-        _ = (C_stack * C_head) * (L : ℝ) * ε ^ 2 := by ring
-    exact h_base.trans h_scale
+    simpa using hCbound x
   obtain ⟨w_L, hw_exp, R_L, hw_eq, C_curv, hCcurv_pos, hR⟩ :=
-    TheoremS13 L u ε hu hure
-  refine' ⟨C_stack * C_head, mul_pos hCpos_stack hCpos, h_bound, _⟩
+    TheoremS13 L u ε0 ε hεle hu hure
+  refine' ⟨C_stack, hCpos_stack, h_bound, _⟩
   refine' ⟨w_L, hw_exp, R_L, hw_eq, C_curv, hCcurv_pos, hR⟩

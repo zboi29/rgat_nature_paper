@@ -69,12 +69,12 @@ noncomputable def lie_bracket (u v : Quaternion ℝ) : Quaternion ℝ :=
   u * v - v * u
 
 def LemmaS12Statement : Prop :=
-  ∃ C1 > 0, ∃ C2 > 0, ∀ ε > 0, ε < 1 →
+  ∃ C1 > 0, ∃ C2 > 0, ∀ ε0 > 0, ∀ ε > 0, ε ≤ ε0 →
   ∀ (L : ℕ) [NeZero L] (u : Fin L → Quaternion ℝ),
   (∀ i, u i = pure_quaternion (fun _ => (u i).re)) → -- Assuming u_i are pure imaginary, though the text says u_i in R^3
   (∀ i, (u i).re = 0) → -- Explicitly stating they are pure imaginary
   (∀ i, ‖u i‖ ≤ ε) →
-  (L * ε ≤ 1) → -- Condition for injectivity radius / convergence
+  (ε0 / (L : ℝ) ≤ 1) → -- Injectivity-radius condition (SI: ε0 below injectivity radius)
   ∃ w_L : Quaternion ℝ,
   w_L.re = 0 ∧
   NormedSpace.exp ℝ w_L = (List.ofFn (fun i => NormedSpace.exp ℝ (u i))).prod ∧
@@ -85,7 +85,8 @@ def LemmaS12Statement : Prop :=
 Theorem S13: Depth accumulates curvature. The composed motion includes commutator curvature of size O(L^2 epsilon^2).
 -/
 def TheoremS13Statement : Prop :=
-  ∀ (L : ℕ) [NeZero L] (u : Fin L → Quaternion ℝ) (ε : ℝ),
+  ∀ (L : ℕ) [NeZero L] (u : Fin L → Quaternion ℝ) (ε0 ε : ℝ),
+  ε ≤ ε0 →
   (∀ i, ‖u i‖ ≤ ε) →
   (∀ i, (u i).re = 0) →
   ∃ w_L : Quaternion ℝ,
@@ -103,18 +104,22 @@ Checking for LipschitzWith definition.
 Theorem S4 (stack-level clause): error accumulation under Lipschitz layers.
 
 This is the stack-level bound implied by the Bridge Theorem. The SI gives an
-explicit constant (product of Lipschitz constants); we record an existence
-statement sufficient for downstream corollaries.
+constant of the form `C_head * ∏ L_ℓ`; we encode that explicitly under the
+assumption `Lip ℓ ≥ 1` to simplify the accumulation bound.
 -/
 def BridgeTheoremStackStatement : Prop :=
   ∀ (L : ℕ) [NeZero L] (d : ℕ)
     (F_rgat F_trans : Fin L → (Fin d → ℝ) → (Fin d → ℝ))
-    (Lip : Fin L → NNReal) (ε : ℝ),
+    (Lip : Fin L → NNReal) (C_head ε : ℝ),
+  C_head > 0 →
   (∀ l, LipschitzWith (Lip l) (F_trans l)) →
-  (∀ l x, ‖F_rgat l x - F_trans l x‖ ≤ ε^2) →
-  ∃ C_stack > 0, ∀ x,
-    ‖(List.ofFn F_rgat).foldr (fun f a => f a) x -
-      (List.ofFn F_trans).foldr (fun f a => f a) x‖ ≤ C_stack * ε^2
+  (∀ l, (1 : ℝ) ≤ (Lip l : ℝ)) →
+  (∀ l x, ‖F_rgat l x - F_trans l x‖ ≤ C_head * ε^2) →
+  ∃ C_stack > 0,
+    C_stack = C_head * (∏ l, (Lip l : ℝ)) ∧
+    ∀ x,
+      ‖(List.ofFn F_rgat).foldr (fun f a => f a) x -
+        (List.ofFn F_trans).foldr (fun f a => f a) x‖ ≤ C_stack * (L : ℝ) * ε^2
 
 /-
 Corollary S14: Standard attention approximates rotor flow.
@@ -126,9 +131,11 @@ generator includes commutator curvature as in Theorem S13.
 def CorollaryS14Statement : Prop :=
   ∀ (L : ℕ) [NeZero L] (d : ℕ)
     (F_gsm F_std : Fin L → (Fin d → ℝ) → (Fin d → ℝ))
-    (Lip : Fin L → NNReal) (C_head ε : ℝ) (u : Fin L → Quaternion ℝ),
+    (Lip : Fin L → NNReal) (C_head ε0 ε : ℝ) (u : Fin L → Quaternion ℝ),
   C_head > 0 →
+  ε ≤ ε0 →
   (∀ l, LipschitzWith (Lip l) (F_std l)) →
+  (∀ l, (1 : ℝ) ≤ (Lip l : ℝ)) →
   (∀ l x, ‖F_gsm l x - F_std l x‖ ≤ C_head * ε^2) →
   (∀ i, ‖u i‖ ≤ ε) →
   (∀ i, (u i).re = 0) →

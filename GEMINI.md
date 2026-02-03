@@ -9,21 +9,25 @@ $$ K(\mu_i, r_j) = \exp\left(-\frac{d_{\mathrm{geo}}(\mu_i, r_j)^2}{2\tau}\right
 where $d_{\mathrm{geo}}$ is the intrinsic geodesic distance on the manifold.
 
 ### Key Theorems (Formalized)
-The following theorems from **@[docs/tex/si_rgat_nature.tex]** are the mathematical backbone of this project and are verified in Lean 4:
+The following theorems from **@[docs/tex/si_rgat_nature.tex]** are the mathematical backbone of this project and are verified in Lean 4 (S1–S14):
 
-*   **Theorem S4 (The Bridge Theorem)**: Proves that in the small-angle limit ($\varepsilon \to 0$), the geometric attention weights converge to the Euclidean Dot-Product Self-Attention of standard Transformers.
-    *   *Lean formalism*: `RgatNaturePaper.BridgeTheorem`
-*   **Lemma S1 (Sign Invariance)**: Establishes that the geodesic distance is well-defined on the double cover $\Spin(3) \to \SO(3)$.
-*   **Theorem S13 (Depth Accumulation)**: Shows that even with near-Euclidean layers, depth accumulates curvature via Baker-Campbell-Hausdorff commutators, preventing deep Transformers from being reducible to linear algebra.
+*   **Lemma S1 (Sign Invariance)**: `RgatNaturePaper.Geometry.Basic` (`sign_invariance`).
+*   **Lemma S2 (Small-angle expansion)**: `RgatNaturePaper.Geometry.SmallAngle` (`LemmaS2`).
+*   **Theorem S4 (The Bridge Theorem)**:
+    *   Head-level: `RgatNaturePaper.Attention.Logits` (`bridge_theorem_head`)
+    *   Stack-level clause (explicit product of Lipschitz constants; assumes `Lip ≥ 1`): `RgatNaturePaper.Gradients.Proofs` (`BridgeTheoremStack`)
+*   **Theorem S13 (Depth Accumulation)**: `RgatNaturePaper.Gradients.Proofs` (`TheoremS13`)
 
 ## Architecture & Directory Structure
 
 ### 1. Formal Verification (Lean 4)
 *   **Root:** `RgatNaturePaper/`
-*   **Goal:** Machine-checkable proofs of Theorems S4, S13, and related lemmas.
+*   **Goal:** Machine-checkable proofs of Theorems S1–S14 and supporting lemmas.
 *   **Key Files:**
-    *   `RgatNaturePaper/Basic.lean`: Definitions of $\Spin(3)$ rotors and geodesic distance (matches **SI Definitions**).
-    *   `RgatNaturePaper/BridgeTheorem.lean`: The main covariance proof.
+    *   `RgatNaturePaper/Geometry/Basic.lean`: Definitions of $\Spin(3)$ rotors and geodesic distance (SI definitions).
+    *   `RgatNaturePaper/Geometry/SmallAngle.lean`: Small-angle expansion (Lemma S2).
+    *   `RgatNaturePaper/Attention/Logits.lean`: Logits and head-level Bridge Theorem (S4).
+    *   `RgatNaturePaper/Gradients/Proofs.lean`: Gradient proofs, stack-level bridge clause, and S13/S14 machinery.
 
 ### 2. Validation & Visualization (Python)
 *   **Root:** `validation/`

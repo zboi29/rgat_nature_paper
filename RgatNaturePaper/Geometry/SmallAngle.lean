@@ -175,9 +175,13 @@ Lemma S2 (Small-angle distance expansion).
 This is a named alias for `small_angle_expansion`, matching the SI result.
 -/
 def LemmaS2Statement : Prop :=
-  ∃ C > 0, ∀ ε > 0, ε < 1 →
+  ∀ ε0 > 0, ∃ C > 0, ∀ ε > 0, ε ≤ ε0 → ε < 1 →
   ∀ u v : Quaternion ℝ, u.re = 0 → v.re = 0 → ‖u‖ ≤ ε → ‖v‖ ≤ ε →
   |d_geo (NormedSpace.exp ℝ u) (NormedSpace.exp ℝ v) ^ 2 - 4 * ‖u - v‖ ^ 2| ≤ C * ε ^ 4
 
 theorem LemmaS2 : LemmaS2Statement := by
-  simpa using small_angle_expansion
+  intro ε0 hε0
+  obtain ⟨C, hC⟩ := small_angle_expansion
+  refine ⟨C, hC.1, ?_⟩
+  intro ε hεpos hεle hεlt u v hu hv hu' hv'
+  exact hC.2 ε hεpos hεlt u v hu hv hu' hv'

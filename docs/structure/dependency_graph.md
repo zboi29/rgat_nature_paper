@@ -31,7 +31,8 @@ See `lakefile.toml` and `lean-toolchain` for authoritative configuration.
 
 ## Notes
 
-- `RgatNaturePaper.Geometry.*` contains all geometric and small-angle approximation lemmas.
+- `RgatNaturePaper.Geometry.*` contains all geometric and small-angle approximation lemmas (including Lemma S2 alias).
 - `RgatNaturePaper.Attention.*` contains softmax machinery, logits/embedding lemmas, and the S4 head-level bridge theorem.
 - `RgatNaturePaper.Transformers.*` currently holds transformer statement definitions.
-- `RgatNaturePaper.Gradients.*` separates statements from proofs for gradient/optimization theorems.
+- `RgatNaturePaper.Gradients.*` separates statements from proofs for gradient/optimization theorems, including the stack-level Bridge Theorem clause with explicit constants.
+- For SI statement mapping and reviewer guidance, see `docs/si_lean_guide.md`.
