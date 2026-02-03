@@ -169,3 +169,15 @@ lemma small_angle_expansion :
     obtain ⟨C₂, hC₂⟩ := inner_approx;
     use C₁ + 8 * C₂;
     exact ⟨ by linarith, fun ε hε₁ hε₂ u v hu hv hu' hv' => abs_le.mpr ⟨ by linarith [ abs_le.mp ( hC₁.2 ε hε₁ hε₂ u v hu hv hu' hv' ), abs_le.mp ( hC₂.2 ε hε₁ hε₂ u v hu hv hu' hv' ) ], by linarith [ abs_le.mp ( hC₁.2 ε hε₁ hε₂ u v hu hv hu' hv' ), abs_le.mp ( hC₂.2 ε hε₁ hε₂ u v hu hv hu' hv' ) ] ⟩ ⟩
+
+/-
+Lemma S2 (Small-angle distance expansion).
+This is a named alias for `small_angle_expansion`, matching the SI result.
+-/
+def LemmaS2Statement : Prop :=
+  ∃ C > 0, ∀ ε > 0, ε < 1 →
+  ∀ u v : Quaternion ℝ, u.re = 0 → v.re = 0 → ‖u‖ ≤ ε → ‖v‖ ≤ ε →
+  |d_geo (NormedSpace.exp ℝ u) (NormedSpace.exp ℝ v) ^ 2 - 4 * ‖u - v‖ ^ 2| ≤ C * ε ^ 4
+
+theorem LemmaS2 : LemmaS2Statement := by
+  simpa using small_angle_expansion

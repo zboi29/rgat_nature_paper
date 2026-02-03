@@ -100,13 +100,47 @@ Checking for LipschitzWith definition.
 #check LipschitzWith
 
 /-
-Corollary S14: Standard attention approximates rotor flow. A depth-L standard Transformer stack approximates the corresponding rotor flow (RGAT) with error O(L epsilon^2).
+Theorem S4 (stack-level clause): error accumulation under Lipschitz layers.
+
+This is the stack-level bound implied by the Bridge Theorem. The SI gives an
+explicit constant (product of Lipschitz constants); we record an existence
+statement sufficient for downstream corollaries.
+-/
+def BridgeTheoremStackStatement : Prop :=
+  ∀ (L : ℕ) [NeZero L] (d : ℕ)
+    (F_rgat F_trans : Fin L → (Fin d → ℝ) → (Fin d → ℝ))
+    (Lip : Fin L → NNReal) (ε : ℝ),
+  (∀ l, LipschitzWith (Lip l) (F_trans l)) →
+  (∀ l x, ‖F_rgat l x - F_trans l x‖ ≤ ε^2) →
+  ∃ C_stack > 0, ∀ x,
+    ‖(List.ofFn F_rgat).foldr (fun f a => f a) x -
+      (List.ofFn F_trans).foldr (fun f a => f a) x‖ ≤ C_stack * ε^2
+
+/-
+Corollary S14: Standard attention approximates rotor flow.
+
+Assuming per-layer GSM vs standard discrepancy (Bridge Theorem conclusion) and
+small-angle generators, the stack-level error is O(L ε^2), and the effective
+generator includes commutator curvature as in Theorem S13.
 -/
 def CorollaryS14Statement : Prop :=
-  ∀ (L : ℕ) [NeZero L] (d : ℕ) (F_gsm F_std : Fin L → (Fin d → ℝ) → (Fin d → ℝ)) (Lip : Fin L → NNReal) (ε : ℝ),
+  ∀ (L : ℕ) [NeZero L] (d : ℕ)
+    (F_gsm F_std : Fin L → (Fin d → ℝ) → (Fin d → ℝ))
+    (Lip : Fin L → NNReal) (C_head ε : ℝ) (u : Fin L → Quaternion ℝ),
+  C_head > 0 →
   (∀ l, LipschitzWith (Lip l) (F_std l)) →
-  (∀ l x, ‖F_gsm l x - F_std l x‖ ≤ ε^2) →
-  ∃ C > 0, ∀ x, ‖(List.ofFn F_gsm).foldr (fun f a => f a) x - (List.ofFn F_std).foldr (fun f a => f a) x‖ ≤ C * L * ε^2
+  (∀ l x, ‖F_gsm l x - F_std l x‖ ≤ C_head * ε^2) →
+  (∀ i, ‖u i‖ ≤ ε) →
+  (∀ i, (u i).re = 0) →
+  ∃ C > 0,
+    (∀ x, ‖(List.ofFn F_gsm).foldr (fun f a => f a) x -
+      (List.ofFn F_std).foldr (fun f a => f a) x‖ ≤ C * L * ε^2) ∧
+    (∃ w_L : Quaternion ℝ,
+      NormedSpace.exp ℝ w_L = (List.ofFn (fun i => NormedSpace.exp ℝ (u i))).prod ∧
+      ∃ R_L : Quaternion ℝ,
+        w_L = (∑ i, u i) + (1 / 2) •
+          (∑ i, ∑ j, if i < j then lie_bracket (u i) (u j) else 0) + R_L ∧
+        ∃ C_curv > 0, ‖R_L‖ ≤ C_curv * (L : ℝ)^3 * ε^3)
 
 /-
 Lemma S3: Softmax stability. For any logits l, l', the softmax satisfies ||softmax(l) - softmax(l')||_infinity <= 1/2 ||l - l'||_infinity.

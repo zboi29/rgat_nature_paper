@@ -95,15 +95,6 @@ def CorollaryS11Statement : Prop :=
   ∀ (r : Quaternion ℝ) (_hr : ‖r‖ = 1) (q : Quaternion ℝ) (_hq : ‖q‖ = 1) (_hqr : q ≠ -r),
   -riemannian_gradient (energy_f r) q = 4 • Log_map q r
 
-/-
-Theorem S4 (Stack-level): For a depth-L stack of Lipschitz layers, the error scales as O(L * epsilon^2).
--/
-def BridgeTheoremStackStatement : Prop :=
-  ∀ (L : ℕ) [NeZero L] (d : ℕ) (F_rgat F_trans : Fin L → (Fin d → ℝ) → (Fin d → ℝ)) (Lip : Fin L → NNReal) (ε : ℝ),
-  (∀ l, LipschitzWith (Lip l) (F_trans l)) →
-  (∀ l x, ‖F_rgat l x - F_trans l x‖ ≤ ε^2) →
-  ∃ C_stack > 0, ∀ x, ‖(List.ofFn F_rgat).foldr (fun f a => f a) x - (List.ofFn F_trans).foldr (fun f a => f a) x‖ ≤ C_stack * ε^2
-
 lemma norm_infty_le_norm {n : ℕ} (x : Fin n → ℝ) : norm_infty x ≤ ‖x‖ := by
   refine norm_infty_le ?_ (norm_nonneg _)
   intro i
@@ -712,3 +703,56 @@ theorem TheoremS13 : TheoremS13Statement := by
             nlinarith [show 0 < (L : ℝ) ^ 3 * ε ^ 3 by
               exact mul_pos (pow_pos (Nat.cast_pos.mpr <| NeZero.pos L) 3)
                 (pow_pos (lt_of_le_of_ne (le_trans (norm_nonneg _) (hu ⟨0, NeZero.pos L⟩)) (Ne.symm hε)) 3)]
+
+/-
+Corollary S14: Stack-level approximation and curvature clause.
+-/
+theorem CorollaryS14 : CorollaryS14Statement := by
+  classical
+  intro L _ d F_gsm F_std Lip C_head ε u hCpos hLip hErr hu hure
+  set ε' : ℝ := ε * Real.sqrt C_head
+  have hCnonneg : 0 ≤ C_head := le_of_lt hCpos
+  have h_eps' : (ε * Real.sqrt C_head) ^ 2 = C_head * ε ^ 2 := by
+    have h_sqrt_sq : (Real.sqrt C_head) ^ 2 = C_head := by
+      simpa [pow_two] using (Real.sq_sqrt hCnonneg)
+    calc
+      (ε * Real.sqrt C_head) ^ 2 = ε ^ 2 * (Real.sqrt C_head) ^ 2 := by ring
+      _ = C_head * ε ^ 2 := by simpa [h_sqrt_sq, mul_assoc, mul_left_comm, mul_comm]
+  have hErr' : ∀ l x, ‖F_gsm l x - F_std l x‖ ≤ ε' ^ 2 := by
+    intro l x
+    have := hErr l x
+    simpa [ε', h_eps'] using this
+  obtain ⟨C_stack, hCpos_stack, hCbound⟩ :=
+    BridgeTheoremStack L d F_gsm F_std Lip ε' hLip hErr'
+  have hLge : (1 : ℝ) ≤ (L : ℝ) := by
+    have hLge_nat : (1 : ℕ) ≤ L := (Nat.one_le_iff_ne_zero).2 (NeZero.ne L)
+    exact_mod_cast hLge_nat
+  have hCstack_nonneg : 0 ≤ (C_stack * C_head : ℝ) :=
+    mul_nonneg (le_of_lt hCpos_stack) (le_of_lt hCpos)
+  have hε_nonneg : 0 ≤ ε ^ 2 := by nlinarith
+  have h_bound :
+      ∀ x,
+        ‖(List.ofFn F_gsm).foldr (fun f a => f a) x -
+            (List.ofFn F_std).foldr (fun f a => f a) x‖ ≤
+          (C_stack * C_head) * (L : ℝ) * ε ^ 2 := by
+    intro x
+    have h_base :
+        ‖(List.ofFn F_gsm).foldr (fun f a => f a) x -
+            (List.ofFn F_std).foldr (fun f a => f a) x‖ ≤
+          C_stack * C_head * ε ^ 2 := by
+      have h := hCbound x
+      simpa [ε', h_eps', mul_assoc, mul_left_comm, mul_comm] using h
+    have h_scale :
+        C_stack * C_head * ε ^ 2 ≤ (C_stack * C_head) * (L : ℝ) * ε ^ 2 := by
+      have h_nonneg : 0 ≤ C_stack * C_head * ε ^ 2 :=
+        mul_nonneg hCstack_nonneg hε_nonneg
+      calc
+        C_stack * C_head * ε ^ 2 = (C_stack * C_head * ε ^ 2) * 1 := by ring
+        _ ≤ (C_stack * C_head * ε ^ 2) * (L : ℝ) := by
+          exact mul_le_mul_of_nonneg_left hLge h_nonneg
+        _ = (C_stack * C_head) * (L : ℝ) * ε ^ 2 := by ring
+    exact h_base.trans h_scale
+  obtain ⟨w_L, hw_exp, R_L, hw_eq, C_curv, hCcurv_pos, hR⟩ :=
+    TheoremS13 L u ε hu hure
+  refine' ⟨C_stack * C_head, mul_pos hCpos_stack hCpos, h_bound, _⟩
+  refine' ⟨w_L, hw_exp, R_L, hw_eq, C_curv, hCcurv_pos, hR⟩
