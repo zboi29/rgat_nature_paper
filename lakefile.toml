@@ -9,6 +9,7 @@ relaxedAutoImplicit = false
 weak.linter.mathlibStandardSet = false
 maxSynthPendingDepth = 3
 linter.unusedSimpArgs = false
+linter.unnecessarySimpa = false
 
 [[require]]
 name = "mathlib"
