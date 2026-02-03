@@ -1,4 +1,4 @@
-# Scientific Reviewer's Guide
+# Reviewer's Guide
 
 Welcome to the code repository for **"Riemannian Geometric-Algebra Transformers"**. This document is intended for editors, peer reviewers, and researchers who wish to verify the scientific claims, mathematical proofs, and experimental results presented in the paper.
 
@@ -8,11 +8,11 @@ The codebase is structured to mirror the paper's organization. The following tab
 
 | Paper Section | Topic | Formal Verification (Lean 4) | Symbolic Validation (Python) |
 | :--- | :--- | :--- | :--- |
-| **Sec 2.1** | Spin(3) Attention | `RgatNaturePaper/Basic.lean` | `validation/symbolic/validation_s1_sign_invariance.py` |
-| **Sec 2.2** | The Bridge Theorem | `RgatNaturePaper/BridgeTheorem.lean` | `validation/symbolic/validation_s4_bridge_theorem.py` |
-| **Sec 3.1** | Stability Analysis | `RgatNaturePaper/Stability.lean` | `validation/symbolic/validation_s3_softmax_stability.py` |
-| **Supp S1** | Sign Invariance | -- | `validation/symbolic/validation_s1_sign_invariance.py` |
-| **Supp S2** | Small Angle Approx | -- | `validation/symbolic/validation_s2_small_angle.py` |
+| **Sec 2.1** | Spin(3) Attention | `RgatNaturePaper/Geometry/Basic.lean` | `validation/symbolic/validation_s1_sign_invariance.py` |
+| **Sec 2.2** | The Bridge Theorem (Head) | `RgatNaturePaper/Attention/Logits.lean` | `validation/symbolic/validation_s4_bridge_theorem.py` |
+| **Sec 3.1** | Stability / Softmax | `RgatNaturePaper/Attention/Softmax.lean` | `validation/symbolic/validation_s3_softmax_stability.py` |
+| **Supp S1** | Sign Invariance | `RgatNaturePaper/Geometry/Basic.lean` | `validation/symbolic/validation_s1_sign_invariance.py` |
+| **Supp S2** | Small Angle Approx | `RgatNaturePaper/Geometry/SmallAngle.lean` | `validation/symbolic/validation_s2_small_angle.py` |
 
 ## 2. Reproducing Figures
 
@@ -60,6 +60,14 @@ done
 
 The `RgatNaturePaper/` directory contains the Lean 4 source code.
 
+### Reviewer Audit Checklist (5 steps)
+
+1. **Confirm SI mapping.** Use `docs/si_lean_guide.md` to locate the statement you care about.
+2. **Inspect the statement.** Open the referenced `Statements.lean` file and verify the Lean statement matches the SI wording (constants and hypotheses explicit).
+3. **Inspect the proof.** Jump to the corresponding proof in `Proofs.lean` (or the module listed) and skim the structure; comments call out nontrivial steps.
+4. **Run the checker.** Execute `lake build` to replay all proofs with the pinned toolchain.
+5. **Cross‑reference equations.** When in doubt, compare against the exact equation or theorem number in `docs/tex/si_rgat_nature.tex`.
+
 ### Setup
 Ensure you have Lean 4 installed (typically via `elan`).
 
@@ -73,15 +81,20 @@ lake build
 If the command completes with no errors, all theorems in the library have been formally verified by the Lean kernel.
 
 ### Navigating the Proofs
-*   **`RgatNaturePaper/Basic.lean`**: Defines the `Rotor` type, the `GeodesicDistance`, and the basic `AttentionScore`.
-*   **`RgatNaturePaper/BridgeTheorem.lean`**: Contains the statement and proof of the main Bridge Theorem. Look for `theorem bridge_theorem ...`.
+*   **`RgatNaturePaper/Geometry/Basic.lean`**: Defines core Spin(3) geometry, geodesic distance, and sign invariance.
+*   **`RgatNaturePaper/Attention/Logits.lean`**: Head‑level Bridge Theorem and logits/embedding machinery.
+*   **`RgatNaturePaper/Attention/Softmax.lean`**: Softmax definitions and stability/derivative lemmas.
+*   **`RgatNaturePaper/Gradients/Statements.lean`** and **`RgatNaturePaper/Gradients/Proofs.lean`**: S10–S14 statements and proofs (including stack‑level Bridge Theorem clause).
 
 ## 5. Directory Structure
 
 ```
 .
 ├── RgatNaturePaper/       # Lean 4 Formal Verification
-│   ├── Basic.lean         # Core definitions (Rotors, Manifolds)
+│   ├── Geometry/          # Spin(3) geometry + small‑angle lemmas (S1–S2)
+│   ├── Attention/         # Softmax/logits + head‑level Bridge Theorem (S4)
+│   ├── Transformers/      # Transformer statement (S9)
+│   ├── Gradients/         # Gradient/curvature statements + proofs (S3, S10–S14)
 │   └── ...
 ├── validation/            # Python Validation & Experiments
 │   ├── plotting/          # Scripts to reproduce paper figures
