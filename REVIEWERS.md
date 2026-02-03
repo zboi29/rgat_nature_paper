@@ -11,23 +11,28 @@ The codebase is structured to mirror the paper's organization. The following tab
 | **Sec 2.1** | Spin(3) Attention | `RgatNaturePaper/Geometry/Basic.lean` | `validation/symbolic/validation_s1_sign_invariance.py` |
 | **Sec 2.2** | The Bridge Theorem (Head) | `RgatNaturePaper/Attention/Logits.lean` | `validation/symbolic/validation_s4_bridge_theorem.py` |
 | **Sec 3.1** | Stability / Softmax | `RgatNaturePaper/Attention/Softmax.lean` | `validation/symbolic/validation_s3_softmax_stability.py` |
+| **Sec 3.2** | Truncation & Bounds | `RgatNaturePaper/Gradients/Proofs.lean` | `validation/symbolic/validation_s7_s8_truncation.py` |
+| **Sec 3.3** | Curvature Accumulation | `RgatNaturePaper/Gradients/Statements.lean`, `RgatNaturePaper/Gradients/Proofs.lean` | `validation/symbolic/validation_s12_bch_accumulation.py` |
 | **Supp S1** | Sign Invariance | `RgatNaturePaper/Geometry/Basic.lean` | `validation/symbolic/validation_s1_sign_invariance.py` |
 | **Supp S2** | Small Angle Approx | `RgatNaturePaper/Geometry/SmallAngle.lean` | `validation/symbolic/validation_s2_small_angle.py` |
+| **Supp S10** | Geodesic Gradient | `RgatNaturePaper/Gradients/Statements.lean`, `RgatNaturePaper/Gradients/Proofs.lean` | `validation/symbolic/validation_s10_geodesic_gradient.py` |
+| **Supp S13** | Depth Accumulation | `RgatNaturePaper/Gradients/Statements.lean`, `RgatNaturePaper/Gradients/Proofs.lean` | `validation/symbolic/validation_s13_depth_curvature.py` |
+| **Supp S14** | Rotor‑flow Approx. | `RgatNaturePaper/Gradients/Statements.lean`, `RgatNaturePaper/Gradients/Proofs.lean` | `validation/symbolic/validation_s14_rotor_flow_approx.py` |
 
 ### SI Statement Index (Lean)
 
 | SI Statement | Lean file(s) | Notes |
 | --- | --- | --- |
-| S1 | `RgatNaturePaper/Geometry/Basic.lean` | Sign invariance on Spin(3). |
-| S2 | `RgatNaturePaper/Geometry/SmallAngle.lean` | Small‑angle expansion with explicit ε0. |
-| S3 | `RgatNaturePaper/Gradients/Proofs.lean` | Mean‑value/regularity machinery. |
-| S4 (head) | `RgatNaturePaper/Attention/Logits.lean` | Head‑level Bridge Theorem. |
-| S4 (stack) | `RgatNaturePaper/Gradients/Proofs.lean` | Explicit product constant; assumes Lip ≥ 1. |
-| S5–S8 | `RgatNaturePaper/Gradients/Proofs.lean` | Markov/convexity/truncation bounds. |
-| S9 | `RgatNaturePaper/Transformers/Statements.lean` | Statement only. |
-| S10–S12 | `RgatNaturePaper/Gradients/Statements.lean`, `RgatNaturePaper/Gradients/Proofs.lean` | Gradient/BCH machinery. |
-| S13 | `RgatNaturePaper/Gradients/Statements.lean`, `RgatNaturePaper/Gradients/Proofs.lean` | Depth accumulation remainder bound. |
-| S14 | `RgatNaturePaper/Gradients/Statements.lean`, `RgatNaturePaper/Gradients/Proofs.lean` | Stack‑level corollary. |
+| S1 | `RgatNaturePaper/Geometry/Basic.lean:39` | `sign_invariance` lemma. |
+| S2 | `RgatNaturePaper/Geometry/SmallAngle.lean:177` (statement), `:182` (proof) | Small‑angle expansion with explicit ε0. |
+| S3 | `RgatNaturePaper/Gradients/Statements.lean:155` (statement), `RgatNaturePaper/Gradients/Proofs.lean:32` (proof) | Softmax stability. |
+| S4 (head) | `RgatNaturePaper/Attention/Logits.lean:74` (statement block) | Head‑level Bridge Theorem. |
+| S4 (stack) | `RgatNaturePaper/Gradients/Statements.lean:110` (statement), `RgatNaturePaper/Gradients/Proofs.lean:113` (proof) | Explicit product constant; assumes Lip ≥ 1. |
+| S5–S8 | `RgatNaturePaper/Gradients/Proofs.lean:257`, `:285`, `:274`, `:307` | Theorem S5, Corollary S6, Lemma S7, Corollary S8. |
+| S9 | `RgatNaturePaper/Transformers/Statements.lean:33` (statement), `RgatNaturePaper/Gradients/Proofs.lean:364` (proof) | Gauge equivariance. |
+| S10–S12 | `RgatNaturePaper/Gradients/Statements.lean:60`, `:71` and `RgatNaturePaper/Gradients/Proofs.lean:448`, `:500` | Gradient/BCH machinery. |
+| S13 | `RgatNaturePaper/Gradients/Statements.lean:87` (statement), `RgatNaturePaper/Gradients/Proofs.lean:673` (proof) | Depth accumulation remainder bound. |
+| S14 | `RgatNaturePaper/Gradients/Statements.lean:131` (statement), `RgatNaturePaper/Gradients/Proofs.lean:731` (proof) | Stack‑level corollary. |
 
 ## 2. Reproducing Figures
 
@@ -37,7 +42,7 @@ The figures in the paper are generated programmatically. You can reproduce them 
 Visualize the connection between heat diffusion on the manifold and the Gaussian kernel in tangent space.
 
 ```bash
-python3 validation/plotting/plot_figure_1_conceptual_bridge.py
+python3 validation/plotting/figure1_conceptual_bridge.py
 ```
 *   **Output**: A window displaying the interactive 3D comparison (or a saved file if run in headless mode).
 
@@ -45,9 +50,9 @@ python3 validation/plotting/plot_figure_1_conceptual_bridge.py
 Verify the $O(\epsilon^2)$ convergence rate and the error bounds.
 
 ```bash
-python3 validation/plotting/plot_figure_2_bridge_theorem.py
+python3 validation/plotting/figure2_3_bridge_theorem.py
 ```
-*   **Output**: Generates the error analysis plots demonstrating the convergence rates predicted by the Bridge Theorem.
+*   **Output**: Generates the Figure 2 Bridge‑Theorem scaling plot and the Figure 3 empirical validation plot (both from the same script).
 
 ## 3. Symbolic Validation (Python)
 
@@ -75,6 +80,10 @@ done
 
 The `RgatNaturePaper/` directory contains the Lean 4 source code.
 
+### Review Path (5–10 minutes)
+
+Use `docs/review_path.md` for a short verification path and direct file/line anchors.
+
 ### Reviewer Audit Checklist (5 steps)
 
 1. **Confirm SI mapping.** Use `docs/si_lean_guide.md` to locate the statement you care about.
@@ -94,6 +103,25 @@ lake build
 ```
 
 If the command completes with no errors, all theorems in the library have been formally verified by the Lean kernel.
+
+### Lean Quick Start (Non‑Lean Users)
+
+From the repo root:
+
+```bash
+lake update
+lake exe cache get
+lake build
+```
+Note: `lake exe cache get` is optional. It speeds up builds but can be skipped for offline or cold builds.
+
+### FAQ
+
+**Q: Do I need doc-gen4 to verify the formalization?**  
+A: No. `lake build` is the authoritative check; doc-gen4 is optional HTML output.
+
+**Q: If `lake build` succeeds, what does that mean?**  
+A: The Lean kernel has verified all statements in the library.
 
 ### Navigating the Proofs
 *   **`RgatNaturePaper/Geometry/Basic.lean`**: Defines core Spin(3) geometry, geodesic distance, and sign invariance.

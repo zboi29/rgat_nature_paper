@@ -18,15 +18,16 @@ statements make those constants explicit.
 
 | SI Statement | Lean file(s) | Notes |
 | --- | --- | --- |
-| S1 (Sign invariance) | `RgatNaturePaper/Geometry/Basic.lean` | Geodesic distance well-defined on Spin(3). |
-| S2 (Small-angle expansion) | `RgatNaturePaper/Geometry/SmallAngle.lean` | Includes explicit ε0 parameter. |
-| S3 (Mean‑value/regularity) | `RgatNaturePaper/Gradients/Proofs.lean` | Mean‑value machinery; see comments in proofs. |
-| S4 (Bridge Theorem, head) | `RgatNaturePaper/Attention/Logits.lean` | Softmax/logits + geometric → Euclidean limit. |
-| S5–S8 (Markov/convexity/truncation) | `RgatNaturePaper/Gradients/Proofs.lean` | Statements and proofs in one module. |
-| S9 (Transformer statement) | `RgatNaturePaper/Transformers/Statements.lean` | Statement only. |
-| S10–S12 (Gradient/BCH machinery) | `RgatNaturePaper/Gradients/Statements.lean` and `Gradients/Proofs.lean` | Core curvature/accumulation bounds. |
-| S13 (Depth accumulation) | `RgatNaturePaper/Gradients/Statements.lean` and `Gradients/Proofs.lean` | Explicit remainder bound. |
-| S14 (Corollary) | `RgatNaturePaper/Gradients/Statements.lean` and `Gradients/Proofs.lean` | Stack‑level approximation + curvature clause. |
+| S1 (Sign invariance) | `RgatNaturePaper/Geometry/Basic.lean:39` | `sign_invariance` lemma. |
+| S2 (Small-angle expansion) | `RgatNaturePaper/Geometry/SmallAngle.lean:177` (statement), `:182` (proof) | Includes explicit ε0 parameter. |
+| S3 (Softmax stability) | `RgatNaturePaper/Gradients/Statements.lean:155` (statement), `RgatNaturePaper/Gradients/Proofs.lean:32` (proof) | Mean‑value/regularity machinery. |
+| S4 (Bridge Theorem, head) | `RgatNaturePaper/Attention/Logits.lean:74` (statement block) | Softmax/logits + geometric → Euclidean limit. |
+| S4 (Bridge Theorem, stack) | `RgatNaturePaper/Gradients/Statements.lean:110` (statement), `RgatNaturePaper/Gradients/Proofs.lean:113` (proof) | Explicit product constant; assumes Lip ≥ 1. |
+| S5–S8 | `RgatNaturePaper/Gradients/Proofs.lean:257`, `:285`, `:274`, `:307` | Theorem S5, Corollary S6, Lemma S7, Corollary S8. |
+| S9 (Gauge equivariance) | `RgatNaturePaper/Transformers/Statements.lean:33` (statement), `RgatNaturePaper/Gradients/Proofs.lean:364` (proof) | Statement + proof. |
+| S10–S12 | `RgatNaturePaper/Gradients/Statements.lean:60`, `:71` and `RgatNaturePaper/Gradients/Proofs.lean:448`, `:500` | Gradient/BCH machinery. |
+| S13 (Depth accumulation) | `RgatNaturePaper/Gradients/Statements.lean:87` (statement), `RgatNaturePaper/Gradients/Proofs.lean:673` (proof) | Explicit remainder bound. |
+| S14 (Corollary) | `RgatNaturePaper/Gradients/Statements.lean:131` (statement), `RgatNaturePaper/Gradients/Proofs.lean:731` (proof) | Stack‑level approximation + curvature clause. |
 
 ## How to navigate the Lean package
 

@@ -10,15 +10,16 @@ The codebase adopts a hybrid approach:
 *   **Formal Verification (Lean 4)**: Mathematical proofs of the core theorems, ensuring logical soundness.
 *   **Symbolic Validation (Python)**: Symbolic checks and numeric experiments to validate the theoretical results and generate publication figures.
 
-Formal verification now covers SI statements **S1–S14**, including the head- and stack-level clauses of the Bridge Theorem.
+Formal verification, via Lean, now covers SI statements **S1–S14**, including the head- and stack-level clauses of the Bridge Theorem.
 
 ## SI ↔ Lean Guide (For Editors and Reviewers)
 
 If you are evaluating the scientific claims, start with:
 
 - `docs/si_lean_guide.md` — direct mapping from SI statements to Lean files.
-- `docs/structure/dependency_graph.md` — module dependency overview.
-- `docs/structure/file_summaries.md` — per-file scope summaries.
+- `docs/review_path.md` — 5–10 minute verification path (statements → build).
+- [docs/structure/dependency_graph.md](docs/structure/dependency_graph.md) — module dependency overview.
+- [docs/structure/file_summaries.md](docs/structure/file_summaries.md) — per-file scope summaries.
 
 These documents are written to make the proof layout auditable without prior Lean familiarity.
 
@@ -35,6 +36,12 @@ These documents are written to make the proof layout auditable without prior Lea
 *   **Python**: 3.10+
 *   **Lean 4**: (Optional, for formal verification) Navigate to https://lean-lang.org/install/ for installation instructions.
 
+### Lean Environment Details
+
+*   **Lean toolchain**: `leanprover/lean4:v4.24.0` (see `lean-toolchain`)
+*   **Mathlib**: `v4.24.0` (see `lakefile.toml`)
+*   **Build entrypoint**: `RgatNaturePaper` (see `lakefile.toml`)
+
 ### Setup
 1.  Clone the repository:
     ```bash
@@ -44,6 +51,8 @@ These documents are written to make the proof layout auditable without prior Lea
 
 2.  Install Python dependencies:
     ```bash
+    python3 -m venv venv
+    source venv/bin/activate
     pip install -r requirements.txt
     ```
 
@@ -51,8 +60,27 @@ These documents are written to make the proof layout auditable without prior Lea
 To immediately verify the "Bridge Theorem" visualization (Figure 1):
 
 ```bash
-python3 validation/plotting/plot_figure_1_conceptual_bridge.py
+python3 validation/plotting/figure1_conceptual_bridge.py
 ```
+
+For more validation details, see [validation/README.md](validation/README.md).
+
+For Figure 2 and Figure 3 (Bridge Theorem scaling + empirical validation), run:
+
+```bash
+python3 validation/plotting/figure2_3_bridge_theorem.py
+```
+
+## Lean Quick Start (Non‑Lean Users)
+
+From the repo root:
+
+```bash
+lake update
+lake exe cache get
+lake build
+```
+If you are offline or prefer a cold build, you can skip `lake exe cache get` (the build will be slower but correct).
 
 ## Repository Map (Lean)
 
@@ -64,7 +92,8 @@ RgatNaturePaper/
   Gradients/     # S3, S10–S14 statements and proofs
 ```
 
-See `docs/structure/dependency_graph.md` and `docs/structure/file_summaries.md` for a detailed dependency map.
+See [docs/structure/dependency_graph.md](docs/structure/dependency_graph.md) and
+[docs/structure/file_summaries.md](docs/structure/file_summaries.md) for a detailed dependency map.
 
 ## Reviewer Guide
 

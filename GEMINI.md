@@ -18,6 +18,8 @@ The following theorems from **@[docs/tex/si_rgat_nature.tex]** are the mathemati
     *   Stack-level clause (explicit product of Lipschitz constants; assumes `Lip ≥ 1`): `RgatNaturePaper.Gradients.Proofs` (`BridgeTheoremStack`)
 *   **Theorem S13 (Depth Accumulation)**: `RgatNaturePaper.Gradients.Proofs` (`TheoremS13`)
 
+For a complete SI statement index and file map, see `docs/si_lean_guide.md`.
+
 ## Architecture & Directory Structure
 
 ### 1. Formal Verification (Lean 4)
