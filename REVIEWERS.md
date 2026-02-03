@@ -14,6 +14,21 @@ The codebase is structured to mirror the paper's organization. The following tab
 | **Supp S1** | Sign Invariance | `RgatNaturePaper/Geometry/Basic.lean` | `validation/symbolic/validation_s1_sign_invariance.py` |
 | **Supp S2** | Small Angle Approx | `RgatNaturePaper/Geometry/SmallAngle.lean` | `validation/symbolic/validation_s2_small_angle.py` |
 
+### SI Statement Index (Lean)
+
+| SI Statement | Lean file(s) | Notes |
+| --- | --- | --- |
+| S1 | `RgatNaturePaper/Geometry/Basic.lean` | Sign invariance on Spin(3). |
+| S2 | `RgatNaturePaper/Geometry/SmallAngle.lean` | Small‑angle expansion with explicit ε0. |
+| S3 | `RgatNaturePaper/Gradients/Proofs.lean` | Mean‑value/regularity machinery. |
+| S4 (head) | `RgatNaturePaper/Attention/Logits.lean` | Head‑level Bridge Theorem. |
+| S4 (stack) | `RgatNaturePaper/Gradients/Proofs.lean` | Explicit product constant; assumes Lip ≥ 1. |
+| S5–S8 | `RgatNaturePaper/Gradients/Proofs.lean` | Markov/convexity/truncation bounds. |
+| S9 | `RgatNaturePaper/Transformers/Statements.lean` | Statement only. |
+| S10–S12 | `RgatNaturePaper/Gradients/Statements.lean`, `RgatNaturePaper/Gradients/Proofs.lean` | Gradient/BCH machinery. |
+| S13 | `RgatNaturePaper/Gradients/Statements.lean`, `RgatNaturePaper/Gradients/Proofs.lean` | Depth accumulation remainder bound. |
+| S14 | `RgatNaturePaper/Gradients/Statements.lean`, `RgatNaturePaper/Gradients/Proofs.lean` | Stack‑level corollary. |
+
 ## 2. Reproducing Figures
 
 The figures in the paper are generated programmatically. You can reproduce them exactly using the scripts in `validation/plotting/`.

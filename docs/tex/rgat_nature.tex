@@ -18,7 +18,7 @@
 \setlength{\parindent}{1em}
 \raggedbottom
 
-\title{Riemannian Geometric Algebra Transformers: A Curved-Geometry Limit of Standard Attention}
+\title{Standard Attention as a Small-Angle Limit of Riemannian Geometric Algebra Transformers}
 \author{Zachary Nathan Joseph}
 \date{\today}
 
@@ -44,11 +44,12 @@ Euclidean, composition is linear, and attention is a softmax of dot products.
 We show that these operations arise as a degenerate limit of a curved geometric
 operator family on the rotor manifold $\Spin(3)$, realized in the Clifford
 algebra $\Cl(3,0)$. In the small-angle regime, geometric softmax reduces to
-classical dot-product attention (under the assumptions of SI Theorem~S4); yet,
+classical dot-product attention; yet,
 at depth, many small-angle steps accumulate curvature through
 Baker--Campbell--Hausdorff commutators, providing a precise sense in which
 standard Transformers approximate rotor dynamics. The paper focuses on this
-mathematical discovery and its structural implications for interpretability.
+mathematical discovery and its structural implications for interpretability; 
+performance studies are a separate empirical program.
 All formal derivations are given in the Supplementary Information.
 \end{abstract}
 
@@ -487,7 +488,7 @@ Euclidean distance and GSM becomes a standard Gaussian kernel.}
 \includegraphics[width=0.98\textwidth]{figure_3_empirical_validation.pdf}
 \caption{\textbf{Empirical Validation.}
 (a) Head-level attention error $\|P^{\rm GSM} - P^{\rm std}\|_\infty$ vs.\ $\varepsilon$
-on log-log axes; fitted slope $m \approx 1.988$ confirms $O(\varepsilon^2)$ scaling; correlation coefficient is exactly $r^2 = 1.0$.
+on log-log axes; fitted slope $m \approx 1.988$ confirms $O(\varepsilon^2)$ scaling; correlation coefficient is $r^2 \approx 1.0$.
 (b) Depth-accumulated error scales linearly with $L$ at fixed $\varepsilon = 0.1$;
 inset shows BCH commutator curvature growth.
 Code and seeds included; experiment runs in ${\sim}15$\,s on CPU.}
