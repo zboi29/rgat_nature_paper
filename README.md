@@ -1,5 +1,10 @@
 # RGAT: Riemannian Geometric-Algebra Transformers (Nature Paper)
 
+[![DOI](https://zenodo.org/badge/1145602390.svg)](https://doi.org/10.5281/zenodo.18475945)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Lean](https://img.shields.io/badge/Lean-4.24.0-5e6ad2.svg)](lean-toolchain)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg)](requirements.txt)
+
 This repository contains the official code and formal verification artifacts for the paper **"Riemannian Geometric-Algebra Transformers: A Curved-Geometry Limit of Standard Attention"**.
 
 ## Overview
