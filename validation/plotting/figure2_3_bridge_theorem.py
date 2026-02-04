@@ -547,7 +547,7 @@ def generate_figure_3(
     depth_values = np.array([1, 2, 4, 8, 12, 16, 24, 32])
     depth_results = run_depth_accumulation_experiment(
         depth_values,
-        epsilon=0.01,  # Use smaller epsilon for cleaner depth scaling
+        epsilon=0.1,  # Use epsilon consistent with depth panel
         n_queries=8,
         n_keys=32,
         n_trials=200,
