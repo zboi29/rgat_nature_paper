@@ -4,6 +4,7 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Lean](https://img.shields.io/badge/Lean-4.24.0-5e6ad2.svg)](lean-toolchain)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg)](requirements.txt)
+[![Tests](https://github.com/zboi29/rgat_nature_paper/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/zboi29/rgat_nature_paper/actions/workflows/lean_action_ci.yml)
 
 This repository contains the official code and formal verification artifacts for the paper **"Standard Attention as a Small-Angle Limit of Riemannian Geometric Algebra Transformers"** (`docs/tex/rgat_nature.tex`).
 
