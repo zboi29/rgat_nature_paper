@@ -50,7 +50,8 @@ Baker--Campbell--Hausdorff commutators \cite{hall2015lie}, providing a precise s
 standard Transformers approximate rotor dynamics. The paper focuses on this
 mathematical discovery and its structural implications for interpretability; 
 performance studies are a separate empirical program.
-All formal derivations are given in the Supplementary Information.
+Formal verification and reproducibility artifacts for this manuscript are
+available in the repository release \cite{joseph2026rgatsoftware}.
 \end{abstract}
 
 \section*{Main}
@@ -265,7 +266,7 @@ and the GSM logit expands as
 \end{equation}
 where $C_i$ is constant in $j$ within row $i$ (query-dependent) and cancels in
 row-wise softmax. Therefore, row-wise softmax matches dot-product attention to $O(\varepsilon^2)$
-under bounded logits (SI Lemmas~S2--S3 and Theorem~S4). This is the precise
+under bounded logits (SI Lemmas~S2--S3 and SI Theorem~S4). This is the precise
 sense in which standard attention is a geometry-collapsed limit of heat-kernel
 attention. The BCH series controls the small-angle regime and requires the
 relative rotation to remain away from the cut locus; we explicitly maintain
@@ -488,7 +489,8 @@ SI; the analytic bridge schematic appears in the SI (Figure~S1).
 Heat-kernel attention on $\Spin(3)$: query (red star) and keys (blue circles)
 connected by geodesic arcs, color-coded by attention weight $K_{ij} = e^{-d_{\rm geo}^2/2\tau}$.
 Inset: in the flat-chart limit ($\varepsilon \to 0$), geodesic distance reduces to
-Euclidean distance and GSM becomes a standard Gaussian kernel.}
+Euclidean distance and GSM becomes a standard Gaussian kernel
+\cite{joseph2026rgatsoftware}.}
 \label{fig:conceptual-bridge}
 \end{figure}
 
@@ -500,7 +502,8 @@ Euclidean distance and GSM becomes a standard Gaussian kernel.}
 on log-log axes; fitted slope $m \approx 1.988$ confirms $O(\varepsilon^2)$ scaling; correlation coefficient is $r^2 \approx 1.0$.
 (b) Depth-accumulated error scales linearly with $L$ at fixed $\varepsilon = 0.1$;
 inset shows BCH commutator curvature growth.
-Code and seeds included; experiment runs in ${\sim}15$\,s on CPU.}
+Code and seeds included in the software release \cite{joseph2026rgatsoftware};
+experiment runs in ${\sim}15$\,s on CPU.}
 \label{fig:empirical-validation}
 \end{figure*}
 
@@ -509,7 +512,8 @@ SI Lemmas~S2--S3 and Theorem~S4 for the Bridge Theorem, SI Theorem~S5 and
 Corollary~S6 for the diffusion operator and its stability, SI Theorem~S9 for
 bi-invariant gauge equivariance, SI Theorems~S10--S11 for geodesic alignment,
 and SI Lemma~S12, Theorem~S13, and Corollary~S14 for depth-accumulated
-curvature.
+curvature. The corresponding Lean and Python artifacts are released with the
+codebase \cite{joseph2026rgatsoftware}.
 
 \section*{Related Work and Positioning}
 This work intersects geometric mechanics, Lie group methods, and diffusion
@@ -580,7 +584,7 @@ its invariants, not empirical tuning.
 \section*{Acknowledgments}
 We thank the open-source community for the libraries and tooling that make this work practical.
 
-\begin{thebibliography}{9}
+\begin{thebibliography}{8}
 
 \bibitem{vaswani2017attention}
 Vaswani, A. \emph{et al.} Attention is all you need. \emph{Advances in Neural Information Processing Systems} \textbf{30}, 5998--6008 (2017).
@@ -602,6 +606,9 @@ Casas, F. and Murua, A. An efficient algorithm for computing the Baker--Campbell
 
 \bibitem{berline1992heat}
 Berline, N., Getzler, E. and Vergne, M. \emph{Heat Kernels and Dirac Operators} (Springer, 1992).
+
+\bibitem{joseph2026rgatsoftware}
+Joseph, Z. N. RGAT: Riemannian Geometric-Algebra Transformers (Nature Paper) (v0.1.2). \emph{Zenodo} https://doi.org/10.5281/zenodo.18511210 (2026).
 \end{thebibliography}
 
 \end{document}
