@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it as follows."
+title: "RGAT: Riemannian Geometric-Algebra Transformers (Nature Paper)"
+type: software
+authors:
+  - family-names: "Joseph"
+    given-names: "Zachary Nathan"
+    orcid: "https://orcid.org/0009-0008-4177-958X"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.18475945"
+repository-code: "https://github.com/zboi29/rgat_nature_paper"
+url: "https://github.com/zboi29/rgat_nature_paper"
+license: "Apache-2.0"
+keywords:
+  - "Riemannian Geometric-Algebra Transformer"
+  - "RGAT"
+  - "Transformer"
+  - "Spin(3)"
+  - "Formal verification"
+  - "Lean 4"
+  - "Geometric deep learning"
+  - "Small-Angle Limit"
+abstract: "Code and formal verification artifacts for Standard Attention as a Small-Angle Limit of Riemannian Geometric Algebra Transformers, including Lean 4 proofs and Python validation scripts."

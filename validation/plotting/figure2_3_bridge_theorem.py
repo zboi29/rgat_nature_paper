@@ -514,6 +514,7 @@ def generate_figure_3(
     output_dir: str,
     tau: float = 1.0,
     seed: int = 42,
+    depth_epsilon: float = 0.1,
 ) -> tuple[str, str, dict]:
     """
     Generate Figure 3: One Decisive Experiment.
@@ -545,9 +546,10 @@ def generate_figure_3(
     
     print("[2/2] Depth accumulation O(Lε²) experiment...")
     depth_values = np.array([1, 2, 4, 8, 12, 16, 24, 32])
+    print(f"    Using fixed depth epsilon = {depth_epsilon}")
     depth_results = run_depth_accumulation_experiment(
         depth_values,
-        epsilon=0.1,  # Use epsilon consistent with depth panel
+        epsilon=depth_epsilon,  # Fixed epsilon for depth panel
         n_queries=8,
         n_keys=32,
         n_trials=200,
@@ -642,12 +644,11 @@ def generate_figure_3(
     ax2.plot(depths, mean_cum, 'o-', markersize=8, color='#3498db', linewidth=2,
              label=r'Cumulative error $\sum_\ell \|P_\ell^{\rm GSM} - P_\ell^{\rm std}\|$')
     
-    # Theoretical O(L·ε²) bound
-    eps_fixed = 0.1
-    C_depth = mean_cum[0] / (1 * eps_fixed**2)
-    theo_depth = C_depth * depths * eps_fixed**2
+    # Linear-in-depth reference at fixed epsilon (this panel keeps epsilon constant)
+    slope_depth = mean_cum[0] / max(depths[0], 1)
+    theo_depth = slope_depth * depths
     ax2.plot(depths, theo_depth, 'r--', linewidth=2,
-             label=r'Theory: $C \cdot L \cdot \varepsilon^2$')
+             label=rf'Linear depth ref (fixed $\varepsilon={depth_epsilon}$)')
     
     ax2.set_xlabel(r'Depth $L$ (number of layers)', fontsize=12)
     ax2.set_ylabel(r'Cumulative Error', fontsize=12)
@@ -700,6 +701,7 @@ def generate_figure_3(
         'metadata': {
             'tau': tau,
             'seed': seed,
+            'depth_epsilon': depth_epsilon,
             'runtime_seconds': elapsed_time,
         }
     }
@@ -716,7 +718,7 @@ def generate_figure_3(
     print(f"""
 Empirical validation of Bridge Theorem bounds (SI Theorem S4, Corollary S14).
 (a) Head-level error ||P^GSM - P^std||_∞ scales as O(ε²); fitted slope m = {slope:.3f} ± {std_err:.3f}.
-(b) Depth-accumulated error scales as O(L·ε²) with ε = 0.1.
+(b) Depth-accumulated error grows linearly with depth L at fixed ε = {depth_epsilon}.
 Inset shows BCH commutator curvature growth.
 Code and seeds included; experiment completed in {elapsed_time:.1f}s on CPU.
 """)
@@ -757,6 +759,12 @@ def main():
         default='all',
         help='Which figure(s) to generate'
     )
+    parser.add_argument(
+        '--depth_epsilon',
+        type=float,
+        default=0.1,
+        help='Fixed epsilon used for Figure 3 depth accumulation panel'
+    )
     
     args = parser.parse_args()
     
@@ -770,7 +778,7 @@ def main():
     
     if args.figure in ['3', 'all']:
         print("\n>>> Generating Figure 3: Empirical Validation")
-        generate_figure_3(args.output_dir, args.tau, args.seed)
+        generate_figure_3(args.output_dir, args.tau, args.seed, args.depth_epsilon)
     
     print("\n" + "=" * 60)
     print("Figure generation complete!")
