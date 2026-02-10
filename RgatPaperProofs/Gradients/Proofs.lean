@@ -6,9 +6,9 @@ the BCH-style accumulation statement (S13). It depends on the attention and
 transformer modules for shared definitions and norms.
 -/
 import Mathlib
-import RgatNaturePaper.Gradients.Statements
-import RgatNaturePaper.Attention
-import RgatNaturePaper.Transformers
+import RgatPaperProofs.Gradients.Statements
+import RgatPaperProofs.Attention
+import RgatPaperProofs.Transformers
 
 open scoped BigOperators
 open scoped Real

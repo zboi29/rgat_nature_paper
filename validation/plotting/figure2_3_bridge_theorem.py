@@ -16,7 +16,7 @@ Figure 3: One Decisive Experiment
 
 References
 ----------
-- Nature paper: rgat_nature.tex (Figure 2 placeholder)
+- paper: rgat_paper.tex (Figure 2 placeholder)
 - SI: Lemma S2-S3 (small-angle expansion, softmax stability)
 - SI: Theorem S4 (Bridge Theorem), Corollary S14 (depth accumulation)
 """

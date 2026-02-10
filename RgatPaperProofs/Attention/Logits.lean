@@ -11,8 +11,8 @@ geodesic distance on Spin(3) (via `d_geo`) between the corresponding rotors
 `exp(Q)` and `exp(K)`.
 -/
 import Mathlib
-import RgatNaturePaper.Geometry
-import RgatNaturePaper.Attention.Softmax
+import RgatPaperProofs.Geometry
+import RgatPaperProofs.Attention.Softmax
 
 open scoped BigOperators
 open scoped Real

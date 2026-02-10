@@ -5,8 +5,8 @@ Defines the core geometric objects (log map, energy) and the formal statements
 for SI Theorems S10–S14. Proofs live in `Gradients/Proofs.lean`.
 -/
 import Mathlib
-import RgatNaturePaper.Attention
-import RgatNaturePaper.Transformers
+import RgatPaperProofs.Attention
+import RgatPaperProofs.Transformers
 
 open scoped BigOperators
 open scoped Real

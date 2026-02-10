@@ -8,31 +8,31 @@ The codebase is structured to mirror the paper's organization. The following tab
 
 | Paper Section | Topic | Formal Verification (Lean 4) | Symbolic Validation (Python) |
 | :--- | :--- | :--- | :--- |
-| **Sec 2.1** | Spin(3) Attention | `RgatNaturePaper/Geometry/Basic.lean` | `validation/symbolic/validation_s1_sign_invariance.py` |
-| **Sec 2.2** | The Bridge Theorem (Head) | `RgatNaturePaper/Attention/Logits.lean` | `validation/symbolic/validation_s4_bridge_theorem.py` |
-| **Sec 3.1** | Stability / Softmax | `RgatNaturePaper/Attention/Softmax.lean` | `validation/symbolic/validation_s3_softmax_stability.py` |
-| **Sec 3.2** | Truncation & Bounds | `RgatNaturePaper/Gradients/Proofs.lean` | `validation/symbolic/validation_s7_s8_truncation.py` |
-| **Sec 3.3** | Curvature Accumulation | `RgatNaturePaper/Gradients/Statements.lean`, `RgatNaturePaper/Gradients/Proofs.lean` | `validation/symbolic/validation_s12_bch_accumulation.py` |
-| **Supp S1** | Sign Invariance | `RgatNaturePaper/Geometry/Basic.lean` | `validation/symbolic/validation_s1_sign_invariance.py` |
-| **Supp S2** | Small Angle Approx | `RgatNaturePaper/Geometry/SmallAngle.lean` | `validation/symbolic/validation_s2_small_angle.py` |
-| **Supp S10** | Geodesic Gradient | `RgatNaturePaper/Gradients/Statements.lean`, `RgatNaturePaper/Gradients/Proofs.lean` | `validation/symbolic/validation_s10_geodesic_gradient.py` |
-| **Supp S13** | Depth Accumulation | `RgatNaturePaper/Gradients/Statements.lean`, `RgatNaturePaper/Gradients/Proofs.lean` | `validation/symbolic/validation_s13_depth_curvature.py` |
-| **Supp S14** | Rotor‑flow Approx. | `RgatNaturePaper/Gradients/Statements.lean`, `RgatNaturePaper/Gradients/Proofs.lean` | `validation/symbolic/validation_s14_rotor_flow_approx.py` |
+| **Sec 2.1** | Spin(3) Attention | `RgatPaperProofs/Geometry/Basic.lean` | `validation/symbolic/validation_s1_sign_invariance.py` |
+| **Sec 2.2** | The Bridge Theorem (Head) | `RgatPaperProofs/Attention/Logits.lean` | `validation/symbolic/validation_s4_bridge_theorem.py` |
+| **Sec 3.1** | Stability / Softmax | `RgatPaperProofs/Attention/Softmax.lean` | `validation/symbolic/validation_s3_softmax_stability.py` |
+| **Sec 3.2** | Truncation & Bounds | `RgatPaperProofs/Gradients/Proofs.lean` | `validation/symbolic/validation_s7_s8_truncation.py` |
+| **Sec 3.3** | Curvature Accumulation | `RgatPaperProofs/Gradients/Statements.lean`, `RgatPaperProofs/Gradients/Proofs.lean` | `validation/symbolic/validation_s12_bch_accumulation.py` |
+| **Supp S1** | Sign Invariance | `RgatPaperProofs/Geometry/Basic.lean` | `validation/symbolic/validation_s1_sign_invariance.py` |
+| **Supp S2** | Small Angle Approx | `RgatPaperProofs/Geometry/SmallAngle.lean` | `validation/symbolic/validation_s2_small_angle.py` |
+| **Supp S10** | Geodesic Gradient | `RgatPaperProofs/Gradients/Statements.lean`, `RgatPaperProofs/Gradients/Proofs.lean` | `validation/symbolic/validation_s10_geodesic_gradient.py` |
+| **Supp S13** | Depth Accumulation | `RgatPaperProofs/Gradients/Statements.lean`, `RgatPaperProofs/Gradients/Proofs.lean` | `validation/symbolic/validation_s13_depth_curvature.py` |
+| **Supp S14** | Rotor‑flow Approx. | `RgatPaperProofs/Gradients/Statements.lean`, `RgatPaperProofs/Gradients/Proofs.lean` | `validation/symbolic/validation_s14_rotor_flow_approx.py` |
 
 ### SI Statement Index (Lean)
 
 | SI Statement | Lean file(s) | Notes |
 | --- | --- | --- |
-| S1 | `RgatNaturePaper/Geometry/Basic.lean:39` | `sign_invariance` lemma. |
-| S2 | `RgatNaturePaper/Geometry/SmallAngle.lean:177` (statement), `:182` (proof) | Small‑angle expansion with explicit ε0. |
-| S3 | `RgatNaturePaper/Gradients/Statements.lean:155` (statement), `RgatNaturePaper/Gradients/Proofs.lean:32` (proof) | Softmax stability. |
-| S4 (head) | `RgatNaturePaper/Attention/Logits.lean:74` (statement block) | Head‑level Bridge Theorem. |
-| S4 (stack) | `RgatNaturePaper/Gradients/Statements.lean:110` (statement), `RgatNaturePaper/Gradients/Proofs.lean:113` (proof) | Explicit product constant; assumes Lip ≥ 1. |
-| S5–S8 | `RgatNaturePaper/Gradients/Proofs.lean:257`, `:285`, `:274`, `:307` | Theorem S5, Corollary S6, Lemma S7, Corollary S8. |
-| S9 | `RgatNaturePaper/Transformers/Statements.lean:33` (statement), `RgatNaturePaper/Gradients/Proofs.lean:364` (proof) | Gauge equivariance. |
-| S10–S12 | `RgatNaturePaper/Gradients/Statements.lean:60`, `:71` and `RgatNaturePaper/Gradients/Proofs.lean:448`, `:500` | Gradient/BCH machinery. |
-| S13 | `RgatNaturePaper/Gradients/Statements.lean:87` (statement), `RgatNaturePaper/Gradients/Proofs.lean:673` (proof) | Depth accumulation remainder bound. |
-| S14 | `RgatNaturePaper/Gradients/Statements.lean:131` (statement), `RgatNaturePaper/Gradients/Proofs.lean:731` (proof) | Stack‑level corollary. |
+| S1 | `RgatPaperProofs/Geometry/Basic.lean:39` | `sign_invariance` lemma. |
+| S2 | `RgatPaperProofs/Geometry/SmallAngle.lean:177` (statement), `:182` (proof) | Small‑angle expansion with explicit ε0. |
+| S3 | `RgatPaperProofs/Gradients/Statements.lean:155` (statement), `RgatPaperProofs/Gradients/Proofs.lean:32` (proof) | Softmax stability. |
+| S4 (head) | `RgatPaperProofs/Attention/Logits.lean:74` (statement block) | Head‑level Bridge Theorem. |
+| S4 (stack) | `RgatPaperProofs/Gradients/Statements.lean:110` (statement), `RgatPaperProofs/Gradients/Proofs.lean:113` (proof) | Explicit product constant; assumes Lip ≥ 1. |
+| S5–S8 | `RgatPaperProofs/Gradients/Proofs.lean:257`, `:285`, `:274`, `:307` | Theorem S5, Corollary S6, Lemma S7, Corollary S8. |
+| S9 | `RgatPaperProofs/Transformers/Statements.lean:33` (statement), `RgatPaperProofs/Gradients/Proofs.lean:364` (proof) | Gauge equivariance. |
+| S10–S12 | `RgatPaperProofs/Gradients/Statements.lean:60`, `:71` and `RgatPaperProofs/Gradients/Proofs.lean:448`, `:500` | Gradient/BCH machinery. |
+| S13 | `RgatPaperProofs/Gradients/Statements.lean:87` (statement), `RgatPaperProofs/Gradients/Proofs.lean:673` (proof) | Depth accumulation remainder bound. |
+| S14 | `RgatPaperProofs/Gradients/Statements.lean:131` (statement), `RgatPaperProofs/Gradients/Proofs.lean:731` (proof) | Stack‑level corollary. |
 
 ## 2. Reproducing Figures
 
@@ -78,7 +78,7 @@ done
 
 ## 4. Formal Verification (Lean 4)
 
-The `RgatNaturePaper/` directory contains the Lean 4 source code.
+The `RgatPaperProofs/` directory contains the Lean 4 source code.
 
 ### Review Path (5–10 minutes)
 
@@ -90,7 +90,7 @@ Use `docs/review_path.md` for a short verification path and direct file/line anc
 2. **Inspect the statement.** Open the referenced `Statements.lean` file and verify the Lean statement matches the SI wording (constants and hypotheses explicit).
 3. **Inspect the proof.** Jump to the corresponding proof in `Proofs.lean` (or the module listed) and skim the structure; comments call out nontrivial steps.
 4. **Run the checker.** Execute `lake build` to replay all proofs with the pinned toolchain.
-5. **Cross‑reference equations.** When in doubt, compare against the exact equation or theorem number in `docs/tex/si_rgat_nature.tex`.
+5. **Cross‑reference equations.** When in doubt, compare against the exact equation or theorem number in `docs/tex/si_rgat_paper.tex`.
 
 ### Setup
 Ensure you have Lean 4 installed (typically via `elan`).
@@ -124,16 +124,16 @@ A: No. `lake build` is the authoritative check; doc-gen4 is optional HTML output
 A: The Lean kernel has verified all statements in the library.
 
 ### Navigating the Proofs
-*   **`RgatNaturePaper/Geometry/Basic.lean`**: Defines core Spin(3) geometry, geodesic distance, and sign invariance.
-*   **`RgatNaturePaper/Attention/Logits.lean`**: Head‑level Bridge Theorem and logits/embedding machinery.
-*   **`RgatNaturePaper/Attention/Softmax.lean`**: Softmax definitions and stability/derivative lemmas.
-*   **`RgatNaturePaper/Gradients/Statements.lean`** and **`RgatNaturePaper/Gradients/Proofs.lean`**: S10–S14 statements and proofs (including stack‑level Bridge Theorem clause).
+*   **`RgatPaperProofs/Geometry/Basic.lean`**: Defines core Spin(3) geometry, geodesic distance, and sign invariance.
+*   **`RgatPaperProofs/Attention/Logits.lean`**: Head‑level Bridge Theorem and logits/embedding machinery.
+*   **`RgatPaperProofs/Attention/Softmax.lean`**: Softmax definitions and stability/derivative lemmas.
+*   **`RgatPaperProofs/Gradients/Statements.lean`** and **`RgatPaperProofs/Gradients/Proofs.lean`**: S10–S14 statements and proofs (including stack‑level Bridge Theorem clause).
 
 ## 5. Directory Structure
 
 ```
 .
-├── RgatNaturePaper/       # Lean 4 Formal Verification
+├── RgatPaperProofs/       # Lean 4 Formal Verification
 │   ├── Geometry/          # Spin(3) geometry + small‑angle lemmas (S1–S2)
 │   ├── Attention/         # Softmax/logits + head‑level Bridge Theorem (S4)
 │   ├── Transformers/      # Transformer statement (S9)

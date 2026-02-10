@@ -8,7 +8,7 @@ Validates that for small generators u, v with norm <= ε:
 This lemma provides the geometric justification for why the curved heat kernel
 approximates the flat Gaussian kernel in the high-temperature (small-angle) limit.
 
-Reference: si_rgat_nature.tex, Lemma S2
+Reference: si_rgat_paper.tex, Lemma S2
 """
 import sympy as sp
 from sympy import Symbol, symbols, exp, Rational, simplify, cos, sin, acos, sqrt, series, Matrix

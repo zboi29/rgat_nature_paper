@@ -9,7 +9,7 @@ Validates that as ||Q||, ||K|| -> 0 (epsilon scale):
 This confirms the central claim that RGAT generalizes the Transformer, strictly
 containing it as the zero-curvature limit.
 
-Reference: si_rgat_nature.tex, Theorem S4
+Reference: si_rgat_paper.tex, Theorem S4
 """
 import sympy as sp
 from sympy import Symbol, symbols, exp, simplify, Matrix, Rational, series, sqrt, acos
@@ -63,7 +63,7 @@ def test_bridge_theorem():
     # WAIT. Standard attention is Q^T K / tau.
     # GSM is -d^2 / 2tau.
     # If we want them to match, we need coefficients to align.
-    # Let's check si_rgat_nature.tex eq 211:
+    # Let's check si_rgat_paper.tex eq 211:
     # l_GSM = 1/tau Q'K - 1/2tau ||K||^2 - 1/2tau ||Q||^2
     
     # Ah, d^2 = 4 ||Q-K||^2 is for the specific implementation in lemma S2

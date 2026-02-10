@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this repository, please cite it as follows."
-title: "RGAT: Riemannian Geometric-Algebra Transformers (Nature Paper)"
+title: "RGAT: Riemannian Geometric-Algebra Transformers (Paper)"
 type: software
 authors:
   - family-names: "Joseph"

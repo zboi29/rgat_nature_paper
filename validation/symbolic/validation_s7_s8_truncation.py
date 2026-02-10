@@ -9,7 +9,7 @@ Validates:
 This ensures that sparse attention approximations have rigorous error control
 proportional to the neglected probability mass.
 
-Reference: si_rgat_nature.tex, Lemma S7, Corollary S8
+Reference: si_rgat_paper.tex, Lemma S7, Corollary S8
 """
 import sympy as sp
 from sympy import Symbol, symbols, Sum, IndexedBase, Idx, simplify, Rational

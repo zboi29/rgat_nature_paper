@@ -7,7 +7,7 @@ auxiliary norms used in stability/approximation bounds. The main output is the
 Jacobian formula and the `1/2`-Lipschitz estimate used in Lemma S3.
 -/
 import Mathlib
-import RgatNaturePaper.Geometry
+import RgatPaperProofs.Geometry
 
 open scoped BigOperators
 open scoped Real

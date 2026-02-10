@@ -7,7 +7,7 @@ Validates that d_geo(-q, k) = d_geo(q, k) for unit quaternions q, k ∈ S³.
 This property is fundamental to the double-cover nature of Spin(3):
 q and -q represent the same rotation in SO(3).
 
-Reference: si_rgat_nature.tex, Lemma S1
+Reference: si_rgat_paper.tex, Lemma S1
 """
 import sympy as sp
 from sympy import Symbol, Abs, sqrt, acos, simplify, cos, sin, Rational

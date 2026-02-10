@@ -91,5 +91,5 @@
    "inputRev": "main",
    "inherited": true,
    "configFile": "lakefile.toml"}],
- "name": "rgat_nature_paper",
+ "name": "rgat_paper_proofs",
  "lakeDir": ".lake"}

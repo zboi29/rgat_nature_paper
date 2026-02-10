@@ -1,6 +1,6 @@
 # Validation & Verification Guide
 
-This directory contains the Python scripts used to validate the mathematical claims of the RGAT Nature paper and reproduce its figures. The validation is split into two categories: **Symbolic Verification** (algebraic checks) and **Plotting** (empirical figures).
+This directory contains the Python scripts used to validate the mathematical claims of the RGAT paper and reproduce its figures. The validation is split into two categories: **Symbolic Verification** (algebraic checks) and **Plotting** (empirical figures).
 
 ## Directory Structure
 
@@ -9,7 +9,7 @@ This directory contains the Python scripts used to validate the mathematical cla
 
 ## 1. Symbolic Verification (`validation/symbolic/`)
 
-These scripts use Python's symbolic mathematics library, `sympy`, to verify lemmas and theorems from **@[docs/tex/si_rgat_nature.tex]**. They serve as an intermediate check between the paper's derivations and the full formalization in Lean 4.
+These scripts use Python's symbolic mathematics library, `sympy`, to verify lemmas and theorems from **@[docs/tex/si_rgat_paper.tex]**. They serve as an intermediate check between the paper's derivations and the full formalization in Lean 4.
 
 Note: not every SI statement has a symbolic script; the table below reflects what is implemented.
 
@@ -58,7 +58,7 @@ python3 validation/plotting/figure2_3_bridge_theorem.py
 
 ## Source of Truth
 All validation targets are defined formally in:
-*   **Definitions & Proofs**: `docs/tex/si_rgat_nature.tex`
-*   **Main Thesis**: `docs/tex/rgat_nature.tex`
+*   **Definitions & Proofs**: `docs/tex/si_rgat_paper.tex`
+*   **Main Thesis**: `docs/tex/rgat_paper.tex`
 
 Please refer to these files for the exact mathematical statements being tested.

@@ -13,7 +13,7 @@ operator family, making the RGAT architecture feel inevitable rather than bespok
 
 References
 ----------
-- Nature paper: rgat_nature.tex (Figure 1 placeholder)
+- paper: rgat_paper.tex (Figure 1 placeholder)
 - SI: Lemma S1 (sign invariance), Theorem S4 (Bridge Theorem)
 - Theory: docs/papers/ga_transformer_with_geometric_softmax_v_1.md §4-6
 """
@@ -572,7 +572,7 @@ def generate_figure_1(output_dir: str, seed: int = 42):
     
     os.makedirs(output_dir, exist_ok=True)
     
-    # High-res PDF for Nature
+    # High-res PDF for publication
     pdf_path = os.path.join(output_dir, 'figure_1_conceptual_bridge.pdf')
     fig.savefig(pdf_path, dpi=300, bbox_inches='tight', format='pdf')
     print(f"Saved: {pdf_path}")

@@ -6,7 +6,7 @@ formalized as a property of GSM attention under left multiplication by a unit
 quaternion and an orthogonal representation on values.
 -/
 import Mathlib
-import RgatNaturePaper.Attention
+import RgatPaperProofs.Attention
 
 open scoped BigOperators
 open scoped Real

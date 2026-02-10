@@ -1,4 +1,4 @@
-# RGAT: Riemannian Geometric-Algebra Transformers (Nature Paper)
+# RGAT: Riemannian Geometric-Algebra Transformers
 
 [![DOI](https://zenodo.org/badge/1145602390.svg)](https://doi.org/10.5281/zenodo.18475945)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
@@ -6,7 +6,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg)](requirements.txt)
 [![Tests](https://github.com/zboi29/rgat_nature_paper/actions/workflows/lean_action_ci.yml/badge.svg?branch=master&event=push)](https://github.com/zboi29/rgat_nature_paper/actions/workflows/lean_action_ci.yml?query=branch%3Amaster+event%3Apush)
 
-This repository contains the official code and formal verification artifacts for the paper **"Standard Attention as a Small-Angle Limit of Riemannian Geometric Algebra Transformers"** (`docs/tex/rgat_nature.tex`).
+This repository contains the official code and formal verification artifacts for the paper **"Standard Attention as a Small-Angle Limit of Riemannian Geometric Algebra Transformers"** (`docs/tex/rgat_paper.tex`).
 
 ## Overview
 
@@ -46,7 +46,7 @@ These documents are written to make the proof layout auditable without prior Lea
 
 *   **Lean toolchain**: `leanprover/lean4:v4.24.0` (see `lean-toolchain`)
 *   **Mathlib**: `v4.24.0` (see `lakefile.toml`)
-*   **Build entrypoint**: `RgatNaturePaper` (see `lakefile.toml`)
+*   **Build entrypoint**: `RgatPaperProofs` (see `lakefile.toml`)
 
 ### Setup
 1.  Clone the repository:
@@ -91,7 +91,7 @@ If you are offline or prefer a cold build, you can skip `lake exe cache get` (th
 ## Repository Map (Lean)
 
 ```
-RgatNaturePaper/
+RgatPaperProofs/
   Geometry/      # S1–S2 primitives and small-angle expansions
   Attention/     # Softmax/logits + S4–S8
   Transformers/  # S9 statement
@@ -103,7 +103,7 @@ See [docs/structure/dependency_graph.md](docs/structure/dependency_graph.md) and
 
 ## Reviewer Guide
 
-For Nature editors, peer reviewers, and anyone interested in a deep dive into the scientific claims and their verification, please consult the **[Reviewers Guide](REVIEWERS.md)**.
+For editors, peer reviewers, and anyone interested in a deep dive into the scientific claims and their verification, please consult the **[Reviewers Guide](REVIEWERS.md)**.
 
 The guide includes:
 *   Detailed mapping between paper sections and code.

@@ -7,7 +7,7 @@ scales as O(L * ε^2) under the Bridge Theorem assumptions.
 
 Total Error <= Sum(Layer Errors) * Product(Lipschitz Constants)
 
-Reference: si_rgat_nature.tex, Corollary S14
+Reference: si_rgat_paper.tex, Corollary S14
 """
 import sympy as sp
 from sympy import Symbol, Product, Sum, IndexedBase, Idx, simplify

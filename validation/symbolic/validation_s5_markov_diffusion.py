@@ -10,7 +10,7 @@ Validates that:
 This confirms GSM attention defines a valid random walk on the graph of tokens,
 interpretable as heat diffusion.
 
-Reference: si_rgat_nature.tex, Theorem S5, Corollary S6
+Reference: si_rgat_paper.tex, Theorem S5, Corollary S6
 """
 import sympy as sp
 from sympy import Symbol, symbols, exp, Sum, simplify, IndexedBase, Idx, Matrix

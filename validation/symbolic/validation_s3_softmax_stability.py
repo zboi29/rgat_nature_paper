@@ -7,7 +7,7 @@ Validates that ||σ(ℓ) - σ(ℓ')||_∞ ≤ (1/2) ||ℓ - ℓ'||_∞.
 The softmax Jacobian has ℓ∞ operator norm at most 1/2, making softmax
 a 1/2-Lipschitz function. This is crucial for the Bridge Theorem proof.
 
-Reference: si_rgat_nature.tex, Lemma S3
+Reference: si_rgat_paper.tex, Lemma S3
 """
 import sympy as sp
 from sympy import Symbol, symbols, simplify, Rational, diff, sqrt, exp, Sum

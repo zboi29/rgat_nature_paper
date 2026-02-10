@@ -8,7 +8,7 @@ Validates that for f(q) = (1/2) d_geo(q, r)^2, the Riemannian gradient is
 This result ensures that minimizing the GSM energy functional corresponds to
 following the geodesic toward the target rotor r.
 
-Reference: si_rgat_nature.tex, Theorem S10, Corollary S11
+Reference: si_rgat_paper.tex, Theorem S10, Corollary S11
 """
 import sympy as sp
 from sympy import Symbol, acos, sqrt, diff, simplify, Matrix, sin, Rational

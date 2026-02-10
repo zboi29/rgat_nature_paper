@@ -8,7 +8,7 @@ exp(u1)...exp(uL) = exp(sum(u) + 1/2 sum([ui, uj]) + O(ε^3))
 This result underpins the "Depth Accumulates Curvature" theorem, showing
 how sequence order (non-commutativity) creates geometric structure.
 
-Reference: si_rgat_nature.tex, Lemma S12
+Reference: si_rgat_paper.tex, Lemma S12
 """
 import sympy as sp
 from sympy import Symbol, simplify, Matrix, Rational

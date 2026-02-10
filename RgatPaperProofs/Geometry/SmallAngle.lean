@@ -5,8 +5,8 @@ Provides bounds that relate `arccos` and the squared geodesic distance to
 Euclidean quantities in the small-angle regime.
 -/
 import Mathlib
-import RgatNaturePaper.Geometry.Basic
-import RgatNaturePaper.Geometry.ExpApprox
+import RgatPaperProofs.Geometry.Basic
+import RgatPaperProofs.Geometry.ExpApprox
 
 open scoped BigOperators
 open scoped Real

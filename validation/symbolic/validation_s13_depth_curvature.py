@@ -8,7 +8,7 @@ the total effective generator w_L contains O(L^2) commutator terms.
 This proves that "flat" layers (local Euclidean approximations) build a
 "curved" global operator (Riemannian manifold dynamics) purely via depth.
 
-Reference: si_rgat_nature.tex, Theorem S13
+Reference: si_rgat_paper.tex, Theorem S13
 """
 import sympy as sp
 from sympy import Symbol, simplify, Sum, IndexedBase, Idx, Rational

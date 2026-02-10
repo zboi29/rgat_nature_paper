@@ -8,7 +8,7 @@ d_geo(gμ, gr) = d_geo(μ, r) for g ∈ Spin(3).
 This ensures the physics of the model depends only on relative geometry,
 not the arbitrary choice of coordinate frame.
 
-Reference: si_rgat_nature.tex, Theorem S9
+Reference: si_rgat_paper.tex, Theorem S9
 """
 import sympy as sp
 from sympy import Symbol, simplify, expand, Abs, Matrix, MatMul

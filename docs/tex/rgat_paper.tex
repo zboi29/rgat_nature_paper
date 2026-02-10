@@ -12,7 +12,7 @@
 \usepackage{microtype}
 \usepackage{mathptmx}
 
-% Nature-style tuning (lightweight)
+% Journal-style tuning (lightweight)
 \setlength{\columnsep}{0.25in}
 \setlength{\parskip}{0.2em}
 \setlength{\parindent}{1em}
@@ -46,12 +46,10 @@ operator family on the rotor manifold $\Spin(3)$, realized in the Clifford
 algebra $\Cl(3,0)$. In the small-angle regime, geometric softmax reduces to
 classical dot-product attention; yet,
 at depth, many small-angle steps accumulate curvature through
-Baker--Campbell--Hausdorff commutators \cite{hall2015lie}, providing a precise sense in which
+Baker--Campbell--Hausdorff commutators, providing a precise sense in which
 standard Transformers approximate rotor dynamics. The paper focuses on this
 mathematical discovery and its structural implications for interpretability; 
 performance studies are a separate empirical program.
-Formal verification and reproducibility artifacts for this manuscript are
-available in the repository release \cite{joseph2026rgatsoftware}.
 \end{abstract}
 
 \section*{Main}
@@ -489,8 +487,7 @@ SI; the analytic bridge schematic appears in the SI (Figure~S1).
 Heat-kernel attention on $\Spin(3)$: query (red star) and keys (blue circles)
 connected by geodesic arcs, color-coded by attention weight $K_{ij} = e^{-d_{\rm geo}^2/2\tau}$.
 Inset: in the flat-chart limit ($\varepsilon \to 0$), geodesic distance reduces to
-Euclidean distance and GSM becomes a standard Gaussian kernel
-\cite{joseph2026rgatsoftware}.}
+Euclidean distance and GSM becomes a standard Gaussian kernel.}
 \label{fig:conceptual-bridge}
 \end{figure}
 
@@ -508,7 +505,7 @@ experiment runs in ${\sim}15$\,s on CPU.}
 \end{figure*}
 
 \textbf{Cross-references.} See SI Lemma~S1 for sign invariance of $\dgeo$,
-SI Lemmas~S2--S3 and Theorem~S4 for the Bridge Theorem, SI Theorem~S5 and
+SI Lemmas~S2--S3 and SI Theorem~S4 for the Bridge Theorem, SI Theorem~S5 and
 Corollary~S6 for the diffusion operator and its stability, SI Theorem~S9 for
 bi-invariant gauge equivariance, SI Theorems~S10--S11 for geodesic alignment,
 and SI Lemma~S12, Theorem~S13, and Corollary~S14 for depth-accumulated
@@ -608,7 +605,7 @@ Casas, F. and Murua, A. An efficient algorithm for computing the Baker--Campbell
 Berline, N., Getzler, E. and Vergne, M. \emph{Heat Kernels and Dirac Operators} (Springer, 1992).
 
 \bibitem{joseph2026rgatsoftware}
-Joseph, Z. N. RGAT: Riemannian Geometric-Algebra Transformers (Nature Paper) (v0.1.2). \emph{Zenodo} https://doi.org/10.5281/zenodo.18511210 (2026).
+Joseph, Z. N. RGAT: Riemannian Geometric-Algebra Transformers (Paper) (v0.1.2). \emph{Zenodo} https://doi.org/10.5281/zenodo.18511210 (2026).
 \end{thebibliography}
 
 \end{document}

@@ -12,12 +12,12 @@ S1–S14 are mapped to Lean files.
 
 Spot‑check a few anchor statements and note their file/line locations:
 
-- **S1 (Sign invariance)**: `RgatNaturePaper/Geometry/Basic.lean:39`
-- **S2 (Small‑angle expansion)**: `RgatNaturePaper/Geometry/SmallAngle.lean:177` (statement) and `:182` (proof)
-- **S4 (Bridge Theorem, head)**: `RgatNaturePaper/Attention/Logits.lean:74` (statement block)
-- **S4 (Bridge Theorem, stack clause)**: `RgatNaturePaper/Gradients/Statements.lean:110` (statement) and `RgatNaturePaper/Gradients/Proofs.lean:113` (proof)
-- **S13 (Depth accumulation)**: `RgatNaturePaper/Gradients/Statements.lean:87` (statement) and `RgatNaturePaper/Gradients/Proofs.lean:673` (proof)
-- **S14 (Corollary)**: `RgatNaturePaper/Gradients/Statements.lean:131` (statement) and `RgatNaturePaper/Gradients/Proofs.lean:731` (proof)
+- **S1 (Sign invariance)**: `RgatPaperProofs/Geometry/Basic.lean:39`
+- **S2 (Small‑angle expansion)**: `RgatPaperProofs/Geometry/SmallAngle.lean:177` (statement) and `:182` (proof)
+- **S4 (Bridge Theorem, head)**: `RgatPaperProofs/Attention/Logits.lean:74` (statement block)
+- **S4 (Bridge Theorem, stack clause)**: `RgatPaperProofs/Gradients/Statements.lean:110` (statement) and `RgatPaperProofs/Gradients/Proofs.lean:113` (proof)
+- **S13 (Depth accumulation)**: `RgatPaperProofs/Gradients/Statements.lean:87` (statement) and `RgatPaperProofs/Gradients/Proofs.lean:673` (proof)
+- **S14 (Corollary)**: `RgatPaperProofs/Gradients/Statements.lean:131` (statement) and `RgatPaperProofs/Gradients/Proofs.lean:731` (proof)
 
 ## 3) Run the formal checker (2–3 minutes)
 
@@ -33,6 +33,6 @@ If `lake build` succeeds, the Lean kernel has verified all statements.
 
 ## 4) Cross‑reference SI equations (optional)
 
-Open `docs/tex/si_rgat_nature.tex` and confirm that the Lean statements match the
+Open `docs/tex/si_rgat_paper.tex` and confirm that the Lean statements match the
 exact theorem/lemma formulations (constants and hypotheses explicit).
 
